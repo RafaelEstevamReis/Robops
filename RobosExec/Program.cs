@@ -1,4 +1,5 @@
 ﻿using System;
+using Robos.Spiders.Camara.Leg.Cota;
 
 namespace RobosExec
 {
@@ -6,7 +7,8 @@ namespace RobosExec
     {
         static void Main(string[] args)
         {
-            Console.WriteLine("Hello World!");
+            var spider = new SpiderCotaParlamentar(2020, 08);
+            spider.Executar();
         }
     }
 }
