@@ -9,4 +9,8 @@
     <PackageReference Include="Net.RafaelEstevam.Spider.Simple.Lib" Version="0.5.320" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\Robops.Lib\Robops.Lib.csproj" />
+  </ItemGroup>
+
 </Project>
