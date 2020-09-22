@@ -1,8 +1,8 @@
 ﻿using System;
 using System.Linq;
-using Robos.Spiders.Camara.Leg.Cota;
+using Robops.Spiders.Camara.Leg.Cota;
 
-namespace RobosExec
+namespace RobopsExec
 {
     class Program
     {

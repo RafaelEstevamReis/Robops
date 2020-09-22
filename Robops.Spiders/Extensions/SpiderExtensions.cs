@@ -2,9 +2,8 @@
 using Net.RafaelEstevam.Spider.Wrappers.HTML;
 using System;
 using System.Collections.Generic;
-using System.Text;
 
-namespace Robos.Spiders.Extensions
+namespace Robops.Spiders.Extensions
 {
     public static class SpiderExtensions
     {

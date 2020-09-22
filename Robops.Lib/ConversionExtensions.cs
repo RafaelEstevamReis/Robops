@@ -1,7 +1,7 @@
 ﻿using Robops.Lib;
 using System;
 
-namespace Robos.Spiders.Extensions
+namespace Robops.Lib
 {
     public static class ConversionExtensions
     {

@@ -1,17 +1,15 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Globalization;
 using System.Linq;
 using System.Net;
-using System.Threading;
 using Net.RafaelEstevam.Spider;
 using Net.RafaelEstevam.Spider.Wrappers.HTML;
 using Robops.Lib;
 using Robops.Lib.Camara.Leg;
 using Robops.Lib.Camara.Leg.Cota;
-using Robos.Spiders.Extensions;
+using Robops.Spiders.Extensions;
 
-namespace Robos.Spiders.Camara.Leg.Cota
+namespace Robops.Spiders.Camara.Leg.Cota
 {
     public class SpiderCotaParlamentar
     {
