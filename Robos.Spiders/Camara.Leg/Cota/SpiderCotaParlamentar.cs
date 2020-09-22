@@ -1,10 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
-using System.Text;
 using System.Threading;
 using Net.RafaelEstevam.Spider;
 using Net.RafaelEstevam.Spider.Wrappers.HTML;
+using Robops.Lib.Camara.Leg;
+using Robops.Lib.Camara.Leg.Cota;
 using Robos.Spiders.Extensions;
 
 namespace Robos.Spiders.Camara.Leg.Cota
@@ -13,28 +15,23 @@ namespace Robos.Spiders.Camara.Leg.Cota
     {
         static readonly string urlBase = "https://www.camara.leg.br/cota-parlamentar/sumarizado?nuDeputadoId={0}&dataInicio={1}/{2}&dataFim={1}/{2}&despesa=&nomeHospede=&nomePassageiro=&nomeFornecedor=&cnpjFornecedor=&numDocumento=&sguf=&filtroNivel1=1&filtroNivel2=2&filtroNivel3=3";
 
-        CancellationTokenSource cancel;
-
         public int Ano { get; }
         public int Mes { get; }
+
+        public List<Deputado> ListaDeputados = new List<Deputado>();
+        public List<Despesa> ListaDespesas = new List<Despesa>(); 
 
         public SpiderCotaParlamentar(int Ano, int Mes)
         {
             this.Ano = Ano;
             this.Mes = Mes;
-            cancel = new CancellationTokenSource();
-
-            //Console.CancelKeyPress += (s, e) =>
-            //{
-            //    cancel.Cancel(); // Interrompe a Spider
-            //};
         }
 
         public void Executar()
         {
             var init = InitializationParams
                 .Default002() // Usar configs padrão 
-                .SetConfig(c => c.Set_DownloadDelay(2000) // Aguardar 2s entre requisições
+                .SetConfig(c => c.Set_DownloadDelay(000) // Aguardar 2s entre requisições
                                  .Disable_AutoAnchorsLinks()); // Não sair navegando
                         
             var spider = new SimpleSpider("cota_camara", new Uri("https://www.camara.leg.br"), init);
@@ -45,7 +42,7 @@ namespace Robos.Spiders.Camara.Leg.Cota
             // Ignorar alguns endereços
             spider.ShouldFetch += spider_ShouldFetch;
             // mandar ver ...
-            spider.Execute(cancel.Token);
+            spider.Execute();
         }
         private void spider_ShouldFetch(object Sender, ShouldFetchEventArgs args)
         {
@@ -66,13 +63,7 @@ namespace Robos.Spiders.Camara.Leg.Cota
                                      "1946", "2233", "3268"
             };
 
-            foreach (var id in IDs)
-            {
-                if (args.Link.ToString().Contains($"={id}&"))
-                {
-                    args.Cancel = true;
-                }
-            }
+            if(IDs.Any(id => args.Link.ToString().Contains($"={id}&"))) args.Cancel = true;
         }
 
         private void Spider_FetchCompleted(object Sender, FetchCompleteEventArgs args)
@@ -111,8 +102,24 @@ namespace Robos.Spiders.Camara.Leg.Cota
 
         private void carregaSumarizado(SimpleSpider spider, FetchCompleteEventArgs args)
         {
-            var tabela = new Tag(args.GetDocument()).SelectTag("//table");
-            var linhas = tabela.SelectTags(".//tr")
+            // cataloga Deputado
+            var tag = new Tag(args.GetDocument());
+
+            var id = args.Link.Uri.Query
+                .Split('&')[0] // primeiro bloco
+                .Split('=')[1] // após o igual
+                .ToInt();
+
+            var h3 = tag.SelectTag("//h3[@class=\"header\"]");
+            ListaDeputados.Add(new Deputado()
+            {
+                Id = id,
+                Nome = h3.SelectTag<Anchor>().InnerText.Trim(),
+                PartidoLideranca = h3.Node.ChildNodes[2].InnerText.Trim()
+            });
+
+            // Carrega despesas
+            var linhas = tag.SelectTags("//table//tr")
                 .Skip(1) // Ignora o Header
                 .SkipLast(1); // Ignora o total
 
@@ -135,9 +142,74 @@ namespace Robos.Spiders.Camara.Leg.Cota
         }
         private void carregaDocumento(SimpleSpider spider, FetchCompleteEventArgs args)
         {
+            int idDeputado = args.Link.Uri.Query
+                   .Split('&')[0]
+                   .Split('=')[1]
+                   .ToInt();
+
+            var hObj = args.GetHObject();
+
+            var ULs = hObj["ul > .listaDefinicao"].ToArray();
+
+            var ulDados = ULs[1];
+            var ulFornecedor = ULs[2];
+            var ulValorDespesa = ULs[3];
+            var ulValores2 = ULs[4];
+
+            int codigoDespesa = args.Link.Uri.Query
+                .Split('&')[3]
+                .Split('=')[1]
+                .ToInt();
+            string nomeDepsesa = ulDados["span"][1].Trim();
+
+            string numero = ulDados["span"][5].Trim();
+            string dtEmissao = ulDados["span"][7].Trim();
+            string competencia = ulDados["span"][9].Trim();
+
+            string fornecedorNome = ulFornecedor["span"][1].Trim();
+            string fornecedorCnpj = ulFornecedor["span"][5].Trim();
+
+            string valorDespesa = ulValorDespesa["span"][0].Trim();
+            string deducoes = ulValores2["span"][0].Trim();
+            string glosas = ulValores2["span"][1].Trim();
+            string restituicoes = ulValores2["span"][2].Trim();
+            string reembolso = ulValorDespesa["span"][5].Trim();
             
+            ListaDespesas.Add(new Despesa()
+            {
+                IdDeputado = idDeputado,
+                TipoDespesa = (TiposDespesa)codigoDespesa,
+                Numero = numero,
+
+                DocumentoFornecedor = fornecedorCnpj,
+                NomeFornecedor = fornecedorNome,
+
+                ValorDespesa = converteValor(valorDespesa),
+                Deducoes = converteValor(deducoes),
+                Glosas = converteValor(glosas),
+                Restituicoes = converteValor(restituicoes),
+                Reembolso = converteValor(reembolso)
+            });
+
         }
 
+        private static decimal converteValor(string valor)
+        {
+            if (valor.Contains(":")) valor = valor.Split(':')[1];
+            valor = valor.Trim();
+
+            if (valor[0] == '(')
+            {
+                valor = valor
+                    .Replace("(", "")
+                    .Replace(")", "");
+            }
+
+            valor = valor.Split('$')[1];
+
+            var ci = new CultureInfo("pt-BR");
+            return decimal.Parse(valor, ci);
+        }
 
         private static Uri montaLinkDeputado(string codigo, int mes, int ano) 
         {
