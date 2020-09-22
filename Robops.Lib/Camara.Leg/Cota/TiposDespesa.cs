@@ -1,11 +1,12 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace Robops.Lib.Camara.Leg.Cota
+﻿namespace Robops.Lib.Camara.Leg.Cota
 {
     public enum TiposDespesa
     {
+        ManutencaoEscritorio = 1,
         Combustiveis = 3,
+        Telefonia = 10,
+        ServicosPostais = 11,
+
+        PassagemAerea = 998,
     }
 }

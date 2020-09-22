@@ -2,9 +2,11 @@
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
+using System.Net;
 using System.Threading;
 using Net.RafaelEstevam.Spider;
 using Net.RafaelEstevam.Spider.Wrappers.HTML;
+using Robops.Lib;
 using Robops.Lib.Camara.Leg;
 using Robops.Lib.Camara.Leg.Cota;
 using Robos.Spiders.Extensions;
@@ -174,7 +176,14 @@ namespace Robos.Spiders.Camara.Leg.Cota
             string glosas = ulValores2["span"][1].Trim();
             string restituicoes = ulValores2["span"][2].Trim();
             string reembolso = ulValorDespesa["span"][5].Trim();
-            
+
+
+            var lista = Enum.GetValues(typeof(TiposDespesa)).Cast<object>().Select(o => (int)o);
+            if (!lista.Contains(codigoDespesa))
+            {
+            }
+
+
             ListaDespesas.Add(new Despesa()
             {
                 IdDeputado = idDeputado,
@@ -182,7 +191,10 @@ namespace Robos.Spiders.Camara.Leg.Cota
                 Numero = numero,
 
                 DocumentoFornecedor = fornecedorCnpj,
-                NomeFornecedor = fornecedorNome,
+                NomeFornecedor = WebUtility.HtmlDecode(fornecedorNome),
+
+                DataEmissao = LocalizationHelper.ParseDatetime(dtEmissao),
+                DataCompetencia = LocalizationHelper.ParseDatetime("01/" + competencia),
 
                 ValorDespesa = converteValor(valorDespesa),
                 Deducoes = converteValor(deducoes),
@@ -190,7 +202,6 @@ namespace Robos.Spiders.Camara.Leg.Cota
                 Restituicoes = converteValor(restituicoes),
                 Reembolso = converteValor(reembolso)
             });
-
         }
 
         private static decimal converteValor(string valor)
@@ -205,10 +216,7 @@ namespace Robos.Spiders.Camara.Leg.Cota
                     .Replace(")", "");
             }
 
-            valor = valor.Split('$')[1];
-
-            var ci = new CultureInfo("pt-BR");
-            return decimal.Parse(valor, ci);
+            return LocalizationHelper.ParseDecimal(valor);
         }
 
         private static Uri montaLinkDeputado(string codigo, int mes, int ano) 

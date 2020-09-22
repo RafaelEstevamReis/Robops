@@ -3,11 +3,11 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 16
 VisualStudioVersion = 16.0.30503.244
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RobosExec", "RobosExec\RobosExec.csproj", "{68B741B8-2081-4A04-9CA8-BC18B2D92A3A}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RobopsExec", "RobopsExec\RobopsExec.csproj", "{68B741B8-2081-4A04-9CA8-BC18B2D92A3A}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Robops.Lib", "Robops.Lib\Robops.Lib.csproj", "{747597C9-7B72-40F5-94FF-4DF9C5BB9378}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Robos.Spiders", "Robos.Spiders\Robos.Spiders.csproj", "{5687A53A-8ECD-4D06-AC53-EAA345172F78}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Robops.Spiders", "Robops.Spiders\Robops.Spiders.csproj", "{5687A53A-8ECD-4D06-AC53-EAA345172F78}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
