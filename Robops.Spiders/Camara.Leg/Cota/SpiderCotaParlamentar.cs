@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Net;
+using System.Threading;
 using Net.RafaelEstevam.Spider;
 using Net.RafaelEstevam.Spider.Wrappers.HTML;
 using Robops.Lib;
@@ -19,7 +21,7 @@ namespace Robops.Spiders.Camara.Leg.Cota
         public int Mes { get; }
 
         public List<Deputado> ListaDeputados = new List<Deputado>();
-        public List<Despesa> ListaDespesas = new List<Despesa>(); 
+        public List<Despesa> ListaDespesas = new List<Despesa>();
 
         public SpiderCotaParlamentar(int Ano, int Mes)
         {
@@ -33,8 +35,23 @@ namespace Robops.Spiders.Camara.Leg.Cota
                 .Default002() // Usar configs padrão 
                 .SetConfig(c => c.Set_DownloadDelay(000) // Aguardar 2s entre requisições
                                  .Disable_AutoAnchorsLinks()); // Não sair navegando
-                        
+
+            while (true)
+            {
+                try
+                {
+                    File.Delete(@"C:\Rafael\Repositorios\OutrasPessoas\Eu Mesmo\Robops\RobopsExec\bin\Debug\netcoreapp3.1\cota_camara\Data\privateData.xml");
+                }
+                catch
+                {
+                    Thread.Sleep(250);
+                    continue;
+                }
+                break;
+            }
+
             var spider = new SimpleSpider("cota_camara", new Uri("https://www.camara.leg.br"), init);
+
             // Obter todos os palamentares
             spider.AddPage(new Uri("https://www.camara.leg.br/cota-parlamentar/index.jsp"), spider.BaseUri);
             // Obter páginas
@@ -46,6 +63,8 @@ namespace Robops.Spiders.Camara.Leg.Cota
         }
         private void spider_ShouldFetch(object Sender, ShouldFetchEventArgs args)
         {
+            // O site da câmara retorna um erro 500 para os registros vazios
+            // para fins de exemplo, vou só pular a maioria aqui
             var IDs = new string[] { "3070", "3005",  "958", "2377", // Lista geral (ano?)
                                      "2338", "1549", "3358", "3437",
                                      "3367", "3036", "2979",  "999",
@@ -63,7 +82,7 @@ namespace Robops.Spiders.Camara.Leg.Cota
                                      "1946", "2233", "3268"
             };
 
-            if(IDs.Any(id => args.Link.ToString().Contains($"={id}&"))) args.Cancel = true;
+            if (IDs.Any(id => args.Link.ToString().Contains($"={id}&"))) args.Cancel = true;
         }
 
         private void Spider_FetchCompleted(object Sender, FetchCompleteEventArgs args)
@@ -82,25 +101,24 @@ namespace Robops.Spiders.Camara.Leg.Cota
                         Nome = o.InnerText.Trim()
                     })
                     .Select(dados => montaLinkDeputado(dados.Codigo, Mes, Ano));
-
                 spider.AddPages(deputados, args.Link);
             }
             else if (args.Link.ToString().Contains("sumarizado?"))
             {
-                carregaSumarizado(spider, args);
+                processaSumarizado(spider, args);
             }
             else if (args.Link.ToString().Contains("analitico?"))
             {
-                carregaAnalitico(spider, args);
+                processaAnalitico(spider, args);
             }
             else if (args.Link.ToString().Contains("documento?"))
             {
-                carregaDocumento(spider, args);
+                processaDocumento(spider, args);
             }
             else { }
         }
 
-        private void carregaSumarizado(SimpleSpider spider, FetchCompleteEventArgs args)
+        private void processaSumarizado(SimpleSpider spider, FetchCompleteEventArgs args)
         {
             // cataloga Deputado
             var tag = new Tag(args.GetDocument());
@@ -127,7 +145,7 @@ namespace Robops.Spiders.Camara.Leg.Cota
                 .Select(tr => tr.SelectTag<Anchor>());
             spider.AddPages(dados, args.Link);
         }
-        private void carregaAnalitico(SimpleSpider spider, FetchCompleteEventArgs args)
+        private void processaAnalitico(SimpleSpider spider, FetchCompleteEventArgs args)
         {
             var linhas = new Tag(args.GetDocument())
                 .SelectTags("//table/tbody/tr")
@@ -140,7 +158,7 @@ namespace Robops.Spiders.Camara.Leg.Cota
                 spider.AddPage(lnk, args.Link);
             }
         }
-        private void carregaDocumento(SimpleSpider spider, FetchCompleteEventArgs args)
+        private void processaDocumento(SimpleSpider spider, FetchCompleteEventArgs args)
         {
             int idDeputado = args.Link.Uri.Query
                    .Split('&')[0]
@@ -148,7 +166,6 @@ namespace Robops.Spiders.Camara.Leg.Cota
                    .ToInt();
 
             var hObj = args.GetHObject();
-
             var ULs = hObj["ul > .listaDefinicao"].ToArray();
 
             var ulDados = ULs[1];
@@ -160,7 +177,7 @@ namespace Robops.Spiders.Camara.Leg.Cota
                 .Split('&')[3]
                 .Split('=')[1]
                 .ToInt();
-            string nomeDepsesa = ulDados["span"][1].Trim();
+            //string nomeDepsesa = ulDados["span"][1].Trim();
 
             string numero = ulDados["span"][5].Trim();
             string dtEmissao = ulDados["span"][7].Trim();
@@ -174,13 +191,6 @@ namespace Robops.Spiders.Camara.Leg.Cota
             string glosas = ulValores2["span"][1].Trim();
             string restituicoes = ulValores2["span"][2].Trim();
             string reembolso = ulValorDespesa["span"][5].Trim();
-
-
-            var lista = Enum.GetValues(typeof(TiposDespesa)).Cast<object>().Select(o => (int)o);
-            if (!lista.Contains(codigoDespesa))
-            {
-            }
-
 
             ListaDespesas.Add(new Despesa()
             {
@@ -207,17 +217,12 @@ namespace Robops.Spiders.Camara.Leg.Cota
             if (valor.Contains(":")) valor = valor.Split(':')[1];
             valor = valor.Trim();
 
-            if (valor[0] == '(')
-            {
-                valor = valor
-                    .Replace("(", "")
-                    .Replace(")", "");
-            }
+            if (valor[0] == '(') valor = valor.Replace("(", "").Replace(")", "");
 
             return LocalizationHelper.ParseDecimal(valor);
         }
 
-        private static Uri montaLinkDeputado(string codigo, int mes, int ano) 
+        private static Uri montaLinkDeputado(string codigo, int mes, int ano)
         {
             return new Uri(string.Format(urlBase, codigo, mes, ano));
         }

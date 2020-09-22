@@ -18,6 +18,5 @@ namespace Robops.Lib
             if (DateTime.TryParse(s, ptBR, DateTimeStyles.None, out DateTime dt)) return dt;
             return DateTime.MinValue;
         }
-
     }
 }

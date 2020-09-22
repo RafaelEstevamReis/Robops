@@ -8,17 +8,15 @@ namespace RobopsExec
     {
         static void Main(string[] args)
         {
-            var spiders = Enumerable.Range(4, 7).Select(mes => new SpiderCotaParlamentar(2020, mes));
+            var spider = new SpiderCotaParlamentar(2020, 8);
+            spider.Executar();
 
-            spiders.AsParallel().All(spider => { spider.Executar(); return true; });
-
-            //var spider = new SpiderCotaParlamentar(2020, 08);
-            //spider.Executar();
+            var despesas = spider.ListaDespesas.ToArray();
+            Console.WriteLine($"Coletado: {despesas.Sum(d => d.ValorDespesa):C2} em {despesas.Length} despesas");
+            var deputados = spider.ListaDeputados.ToArray();
+            Console.WriteLine($" em {deputados.Length} deputados");
 
             Console.WriteLine("Fim");
-
-            //var despesas = spider.ListaDespesas.ToArray();
-            //despesas = despesas;
         }
     }
 }

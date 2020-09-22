@@ -19,6 +19,5 @@ namespace Robops.Lib.Camara.Leg.Cota
         public decimal Glosas { get; set; }
         public decimal Restituicoes { get; set; }
         public decimal Reembolso { get; set; }
-
     }
 }

@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace Robops.Lib.Camara.Leg
+﻿namespace Robops.Lib.Camara.Leg
 {
     public class Deputado
     {
