@@ -29,26 +29,13 @@ namespace Robops.Spiders.Camara.Leg.Cota
             this.Mes = Mes;
         }
 
+        List<Uri> listaNotasAcessar = new List<Uri>();
         public void Executar()
         {
             var init = InitializationParams
                 .Default002() // Usar configs padrão 
-                .SetConfig(c => c.Set_DownloadDelay(000) // Aguardar 2s entre requisições
+                .SetConfig(c => c.Set_DownloadDelay(2000) // Aguardar 2s entre requisições
                                  .Disable_AutoAnchorsLinks()); // Não sair navegando
-
-            while (true)
-            {
-                try
-                {
-                    File.Delete(@"C:\Rafael\Repositorios\OutrasPessoas\Eu Mesmo\Robops\RobopsExec\bin\Debug\netcoreapp3.1\cota_camara\Data\privateData.xml");
-                }
-                catch
-                {
-                    Thread.Sleep(250);
-                    continue;
-                }
-                break;
-            }
 
             var spider = new SimpleSpider("cota_camara", new Uri("https://www.camara.leg.br"), init);
 
@@ -94,14 +81,17 @@ namespace Robops.Spiders.Camara.Leg.Cota
                 Tag tag = new Tag(args.GetDocument());
                 var lista = tag.SelectTags("//ul[@id=\"listaDeputados\"]//span");
 
-                var deputados = lista
-                    .Select(o => new
-                    {
-                        Codigo = o.Id,
-                        Nome = o.InnerText.Trim()
-                    })
-                    .Select(dados => montaLinkDeputado(dados.Codigo, Mes, Ano));
-                spider.AddPages(deputados, args.Link);
+                foreach (var Mes in Enumerable.Range(1, 8))
+                {
+                    var deputados = lista
+                        .Select(o => new
+                        {
+                            Codigo = o.Id,
+                            Nome = o.InnerText.Trim()
+                        })
+                        .Select(dados => montaLinkDeputado(dados.Codigo, Mes, Ano));
+                    spider.AddPages(deputados, args.Link);
+                }
             }
             else if (args.Link.ToString().Contains("sumarizado?"))
             {
@@ -113,11 +103,14 @@ namespace Robops.Spiders.Camara.Leg.Cota
             }
             else if (args.Link.ToString().Contains("documento?"))
             {
-                processaDocumento(spider, args);
+                //processaDocumento(spider, args);
+            }
+            else if (args.Link.ToString().Contains("/nota-fiscal-eletronica?"))
+            {
+                processaNF(spider, args);
             }
             else { }
         }
-
         private void processaSumarizado(SimpleSpider spider, FetchCompleteEventArgs args)
         {
             // cataloga Deputado
@@ -154,8 +147,16 @@ namespace Robops.Spiders.Camara.Leg.Cota
             foreach (var linha in linhas)
             {
                 var lnk = linha.SelectTag<Anchor>(".//a");
-                if (!lnk.Href.Contains("/documento?nuDeputadoId")) continue; // é externo
-                spider.AddPage(lnk, args.Link);
+                if (lnk.Href.Contains("/documento?nuDeputadoId"))
+                {
+                    spider.AddPage(lnk, args.Link);
+                }
+                // https://www.camara.leg.br/cota-parlamentar/nota-fiscal-eletronica?ideDocumentoFiscal=0000000
+                if (lnk.Href.Contains("/nota-fiscal-eletronica?"))
+                {
+                    spider.AddPage(lnk, args.Link);
+                }
+
             }
         }
         private void processaDocumento(SimpleSpider spider, FetchCompleteEventArgs args)
@@ -210,6 +211,33 @@ namespace Robops.Spiders.Camara.Leg.Cota
                 Restituicoes = converteValor(restituicoes),
                 Reembolso = converteValor(reembolso)
             });
+        }
+
+        private void processaNF(SimpleSpider spider, FetchCompleteEventArgs args)
+        {
+            if (args.Html.Contains("<!--NFE-API-->"))
+            {
+            }
+            else
+            {      
+                // Ainda não há o que fazer
+                return;
+            }
+
+            var html = args.Html.Substring(args.Html.IndexOf("<!--NFE-API-->"));
+
+            if (html.Contains(".location"))
+            {
+            }
+            else
+            {
+                // Ainda não há o que fazer
+                return;
+            }
+
+            html = html.Substring(html.IndexOf("http"));
+            var url = html.Substring(0, html.IndexOf("\""));
+            listaNotasAcessar.Add(new Uri(url));
         }
 
         private static decimal converteValor(string valor)
