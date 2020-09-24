@@ -1,9 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using System.Net;
-using System.Threading;
 using Net.RafaelEstevam.Spider;
 using Net.RafaelEstevam.Spider.Wrappers.HTML;
 using Robops.Lib;
@@ -34,20 +32,34 @@ namespace Robops.Spiders.Camara.Leg.Cota
         {
             var init = InitializationParams
                 .Default002() // Usar configs padrão 
-                .SetConfig(c => c.Set_DownloadDelay(2000) // Aguardar 2s entre requisições
+                .SetConfig(c => c.Set_DownloadDelay(000) // Aguardar 2s entre requisições
                                  .Disable_AutoAnchorsLinks()); // Não sair navegando
 
             var spider = new SimpleSpider("cota_camara", new Uri("https://www.camara.leg.br"), init);
+            spider.Configuration.SpiderAllowHostViolation = true; // Permite sair do domínio *.camara.leg.br
 
             // Obter todos os palamentares
             spider.AddPage(new Uri("https://www.camara.leg.br/cota-parlamentar/index.jsp"), spider.BaseUri);
             // Obter páginas
             spider.FetchCompleted += Spider_FetchCompleted;
+
+            spider.FetchFailed += spider_FetchFailed;
+
             // Ignorar alguns endereços
             spider.ShouldFetch += spider_ShouldFetch;
             // mandar ver ...
             spider.Execute();
         }
+
+        private void spider_FetchFailed(object Sender, FetchFailEventArgs args)
+        {
+            if (args.HttpErrorCode == 500) return;
+            if (args.HttpErrorCode == 403) return;
+            if (args.HttpErrorCode == 404) return;
+
+            args = args;
+        }
+
         private void spider_ShouldFetch(object Sender, ShouldFetchEventArgs args)
         {
             // O site da câmara retorna um erro 500 para os registros vazios
@@ -70,6 +82,18 @@ namespace Robops.Spiders.Camara.Leg.Cota
             };
 
             if (IDs.Any(id => args.Link.ToString().Contains($"={id}&"))) args.Cancel = true;
+
+            // Alguns links são redirecionados, já arruma aqui
+            if (args.Link.Uri.Host.Contains("www.fazenda.df.gov.br"))
+            {
+                args.Cancel = true;
+                (Sender as SimpleSpider).AddPage(new Uri($"https://dec.fazenda.df.gov.br/ConsultarNFCe.aspx{args.Link.Uri.Query}"), args.Link.SourceUri);
+            }
+            // ?? não carregar
+            if (args.Link.ToString().Contains("jsessionid="))
+            {
+                args.Cancel = true;
+            }
         }
 
         private void Spider_FetchCompleted(object Sender, FetchCompleteEventArgs args)
@@ -81,17 +105,14 @@ namespace Robops.Spiders.Camara.Leg.Cota
                 Tag tag = new Tag(args.GetDocument());
                 var lista = tag.SelectTags("//ul[@id=\"listaDeputados\"]//span");
 
-                foreach (var Mes in Enumerable.Range(1, 8))
-                {
-                    var deputados = lista
-                        .Select(o => new
-                        {
-                            Codigo = o.Id,
-                            Nome = o.InnerText.Trim()
-                        })
-                        .Select(dados => montaLinkDeputado(dados.Codigo, Mes, Ano));
-                    spider.AddPages(deputados, args.Link);
-                }
+                var deputados = lista
+                    .Select(o => new
+                    {
+                        Codigo = o.Id,
+                        Nome = o.InnerText.Trim()
+                    })
+                    .Select(dados => montaLinkDeputado(dados.Codigo, Mes, Ano));
+                spider.AddPages(deputados, args.Link);
             }
             else if (args.Link.ToString().Contains("sumarizado?"))
             {
@@ -236,8 +257,9 @@ namespace Robops.Spiders.Camara.Leg.Cota
             }
 
             html = html.Substring(html.IndexOf("http"));
-            var url = html.Substring(0, html.IndexOf("\""));
-            listaNotasAcessar.Add(new Uri(url));
+            var uri = new Uri(html.Substring(0, html.IndexOf("\"")));
+            listaNotasAcessar.Add(uri);
+            spider.AddPage(uri, args.Link);
         }
 
         private static decimal converteValor(string valor)
