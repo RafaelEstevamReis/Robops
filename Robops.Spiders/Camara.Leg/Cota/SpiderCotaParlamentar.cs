@@ -105,14 +105,17 @@ namespace Robops.Spiders.Camara.Leg.Cota
                 Tag tag = new Tag(args.GetDocument());
                 var lista = tag.SelectTags("//ul[@id=\"listaDeputados\"]//span");
 
-                var deputados = lista
-                    .Select(o => new
-                    {
-                        Codigo = o.Id,
-                        Nome = o.InnerText.Trim()
-                    })
-                    .Select(dados => montaLinkDeputado(dados.Codigo, Mes, Ano));
-                spider.AddPages(deputados, args.Link);
+                foreach (var Mes in Enumerable.Range(1, 7))
+                {
+                    var deputados = lista
+                        .Select(o => new
+                        {
+                            Codigo = o.Id,
+                            Nome = o.InnerText.Trim()
+                        })
+                        .Select(dados => montaLinkDeputado(dados.Codigo, Mes, Ano));
+                    spider.AddPages(deputados, args.Link);
+                }
             }
             else if (args.Link.ToString().Contains("sumarizado?"))
             {
@@ -130,8 +133,16 @@ namespace Robops.Spiders.Camara.Leg.Cota
             {
                 processaNF(spider, args);
             }
-            else { }
+            else if (args.Link.Uri.Host != spider.BaseUri.Host)
+            {
+                processaCupom(spider, args);
+            }
+            else
+            {
+
+            }
         }
+
         private void processaSumarizado(SimpleSpider spider, FetchCompleteEventArgs args)
         {
             // cataloga Deputado
@@ -261,6 +272,54 @@ namespace Robops.Spiders.Camara.Leg.Cota
             listaNotasAcessar.Add(uri);
             spider.AddPage(uri, args.Link);
         }
+        int contagemCPF = 0;
+        private void processaCupom(SimpleSpider spider, FetchCompleteEventArgs args)
+        {
+            if (args.Html.Contains("Nota não encontrada")) return;
+
+            if (args.Html == "") return; // ??
+
+            if (args.Link.Uri.Host.Contains(".rj.gov.")) return; // Usa POST
+            if (args.Link.Uri.Host.Contains(".es.gov.")) return; // Usa POST
+            if (args.Link.Uri.Host.Contains(".rr.gov.")) return; // Usa POST
+            if (args.Link.Uri.Host.Contains(".pb.gov.")) return; // Captcha
+            if (args.Link.Uri.Host.Contains(".ro.gov.")) return; // Captcha
+            if (args.Link.Uri.Host.Contains(".ma.gov.")) return; // Captcha
+            if (args.Link.Uri.Host.Contains(".ap.gov.")) return; // Redirect -> Captcha
+
+            if (args.Link.Uri.Host.Contains(".pi.gov.")) return; // Erro interno, um dia volta ?
+
+            if (args.Html.Contains("iframe"))
+            {
+                var frame = new Tag(args.GetDocument()).SelectTag<IFrame>();
+                if (frame == null)
+                {
+                    return; // Ainda não sei como pegar
+                }
+
+
+                var newUri = frame.Src;
+                spider.AddPage(new Uri(newUri), args.Link);
+                return;
+            }
+
+            if (args.Html.Contains("CPF"))
+            {
+                contagemCPF++;
+            }
+            else if (args.Html.Contains("CNPJ"))
+            {
+                var ocorrencias = args.Html.Split("CNPJ");
+                if (ocorrencias.Length > 2)
+                {
+
+                }
+            }
+            else
+            {
+            }
+        }
+
 
         private static decimal converteValor(string valor)
         {
