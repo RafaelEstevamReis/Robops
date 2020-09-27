@@ -7,6 +7,10 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="Net.RafaelEstevam.Spider.Simple.Lib" Version="0.5.347" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\Robops.Lib\Robops.Lib.csproj" />
     <ProjectReference Include="..\Robops.Spiders\Robops.Spiders.csproj" />
   </ItemGroup>

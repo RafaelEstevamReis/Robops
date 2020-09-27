@@ -1,9 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using System.Net;
-using System.Threading;
 using Net.RafaelEstevam.Spider;
 using Net.RafaelEstevam.Spider.Wrappers.HTML;
 using Robops.Lib;
@@ -29,6 +27,7 @@ namespace Robops.Spiders.Camara.Leg.Cota
             this.Mes = Mes;
         }
 
+        List<Uri> listaNotasAcessar = new List<Uri>();
         public void Executar()
         {
             var init = InitializationParams
@@ -36,31 +35,31 @@ namespace Robops.Spiders.Camara.Leg.Cota
                 .SetConfig(c => c.Set_DownloadDelay(000) // Aguardar 2s entre requisições
                                  .Disable_AutoAnchorsLinks()); // Não sair navegando
 
-            while (true)
-            {
-                try
-                {
-                    File.Delete(@"C:\Rafael\Repositorios\OutrasPessoas\Eu Mesmo\Robops\RobopsExec\bin\Debug\netcoreapp3.1\cota_camara\Data\privateData.xml");
-                }
-                catch
-                {
-                    Thread.Sleep(250);
-                    continue;
-                }
-                break;
-            }
-
             var spider = new SimpleSpider("cota_camara", new Uri("https://www.camara.leg.br"), init);
+            spider.Configuration.SpiderAllowHostViolation = true; // Permite sair do domínio *.camara.leg.br
 
             // Obter todos os palamentares
             spider.AddPage(new Uri("https://www.camara.leg.br/cota-parlamentar/index.jsp"), spider.BaseUri);
             // Obter páginas
             spider.FetchCompleted += Spider_FetchCompleted;
+
+            spider.FetchFailed += spider_FetchFailed;
+
             // Ignorar alguns endereços
             spider.ShouldFetch += spider_ShouldFetch;
             // mandar ver ...
             spider.Execute();
         }
+
+        private void spider_FetchFailed(object Sender, FetchFailEventArgs args)
+        {
+            if (args.HttpErrorCode == 500) return;
+            if (args.HttpErrorCode == 403) return;
+            if (args.HttpErrorCode == 404) return;
+
+            args = args;
+        }
+
         private void spider_ShouldFetch(object Sender, ShouldFetchEventArgs args)
         {
             // O site da câmara retorna um erro 500 para os registros vazios
@@ -83,6 +82,18 @@ namespace Robops.Spiders.Camara.Leg.Cota
             };
 
             if (IDs.Any(id => args.Link.ToString().Contains($"={id}&"))) args.Cancel = true;
+
+            // Alguns links são redirecionados, já arruma aqui
+            if (args.Link.Uri.Host.Contains("www.fazenda.df.gov.br"))
+            {
+                args.Cancel = true;
+                (Sender as SimpleSpider).AddPage(new Uri($"https://dec.fazenda.df.gov.br/ConsultarNFCe.aspx{args.Link.Uri.Query}"), args.Link.SourceUri);
+            }
+            // ?? não carregar
+            if (args.Link.ToString().Contains("jsessionid="))
+            {
+                args.Cancel = true;
+            }
         }
 
         private void Spider_FetchCompleted(object Sender, FetchCompleteEventArgs args)
@@ -94,14 +105,17 @@ namespace Robops.Spiders.Camara.Leg.Cota
                 Tag tag = new Tag(args.GetDocument());
                 var lista = tag.SelectTags("//ul[@id=\"listaDeputados\"]//span");
 
-                var deputados = lista
-                    .Select(o => new
-                    {
-                        Codigo = o.Id,
-                        Nome = o.InnerText.Trim()
-                    })
-                    .Select(dados => montaLinkDeputado(dados.Codigo, Mes, Ano));
-                spider.AddPages(deputados, args.Link);
+                foreach (var Mes in Enumerable.Range(1, 7))
+                {
+                    var deputados = lista
+                        .Select(o => new
+                        {
+                            Codigo = o.Id,
+                            Nome = o.InnerText.Trim()
+                        })
+                        .Select(dados => montaLinkDeputado(dados.Codigo, Mes, Ano));
+                    spider.AddPages(deputados, args.Link);
+                }
             }
             else if (args.Link.ToString().Contains("sumarizado?"))
             {
@@ -113,9 +127,20 @@ namespace Robops.Spiders.Camara.Leg.Cota
             }
             else if (args.Link.ToString().Contains("documento?"))
             {
-                processaDocumento(spider, args);
+                //processaDocumento(spider, args);
             }
-            else { }
+            else if (args.Link.ToString().Contains("/nota-fiscal-eletronica?"))
+            {
+                processaNF(spider, args);
+            }
+            else if (args.Link.Uri.Host != spider.BaseUri.Host)
+            {
+                processaCupom(spider, args);
+            }
+            else
+            {
+
+            }
         }
 
         private void processaSumarizado(SimpleSpider spider, FetchCompleteEventArgs args)
@@ -154,8 +179,16 @@ namespace Robops.Spiders.Camara.Leg.Cota
             foreach (var linha in linhas)
             {
                 var lnk = linha.SelectTag<Anchor>(".//a");
-                if (!lnk.Href.Contains("/documento?nuDeputadoId")) continue; // é externo
-                spider.AddPage(lnk, args.Link);
+                if (lnk.Href.Contains("/documento?nuDeputadoId"))
+                {
+                    spider.AddPage(lnk, args.Link);
+                }
+                // https://www.camara.leg.br/cota-parlamentar/nota-fiscal-eletronica?ideDocumentoFiscal=0000000
+                if (lnk.Href.Contains("/nota-fiscal-eletronica?"))
+                {
+                    spider.AddPage(lnk, args.Link);
+                }
+
             }
         }
         private void processaDocumento(SimpleSpider spider, FetchCompleteEventArgs args)
@@ -211,6 +244,82 @@ namespace Robops.Spiders.Camara.Leg.Cota
                 Reembolso = converteValor(reembolso)
             });
         }
+
+        private void processaNF(SimpleSpider spider, FetchCompleteEventArgs args)
+        {
+            if (args.Html.Contains("<!--NFE-API-->"))
+            {
+            }
+            else
+            {      
+                // Ainda não há o que fazer
+                return;
+            }
+
+            var html = args.Html.Substring(args.Html.IndexOf("<!--NFE-API-->"));
+
+            if (html.Contains(".location"))
+            {
+            }
+            else
+            {
+                // Ainda não há o que fazer
+                return;
+            }
+
+            html = html.Substring(html.IndexOf("http"));
+            var uri = new Uri(html.Substring(0, html.IndexOf("\"")));
+            listaNotasAcessar.Add(uri);
+            spider.AddPage(uri, args.Link);
+        }
+        int contagemCPF = 0;
+        private void processaCupom(SimpleSpider spider, FetchCompleteEventArgs args)
+        {
+            if (args.Html.Contains("Nota não encontrada")) return;
+
+            if (args.Html == "") return; // ??
+
+            if (args.Link.Uri.Host.Contains(".rj.gov.")) return; // Usa POST
+            if (args.Link.Uri.Host.Contains(".es.gov.")) return; // Usa POST
+            if (args.Link.Uri.Host.Contains(".rr.gov.")) return; // Usa POST
+            if (args.Link.Uri.Host.Contains(".pb.gov.")) return; // Captcha
+            if (args.Link.Uri.Host.Contains(".ro.gov.")) return; // Captcha
+            if (args.Link.Uri.Host.Contains(".ma.gov.")) return; // Captcha
+            if (args.Link.Uri.Host.Contains(".ap.gov.")) return; // Redirect -> Captcha
+
+            if (args.Link.Uri.Host.Contains(".pi.gov.")) return; // Erro interno, um dia volta ?
+
+            if (args.Html.Contains("iframe"))
+            {
+                var frame = new Tag(args.GetDocument()).SelectTag<IFrame>();
+                if (frame == null)
+                {
+                    return; // Ainda não sei como pegar
+                }
+
+
+                var newUri = frame.Src;
+                spider.AddPage(new Uri(newUri), args.Link);
+                return;
+            }
+
+            if (args.Html.Contains("CPF"))
+            {
+                contagemCPF++;
+            }
+            else if (args.Html.Contains("CNPJ"))
+            {
+                var ocorrencias = args.Html.Split("CNPJ");
+                if (ocorrencias.Length > 2)
+                {
+
+                }
+            }
+            else
+            {
+            }
+        }
+
 
         private static decimal converteValor(string valor)
         {
