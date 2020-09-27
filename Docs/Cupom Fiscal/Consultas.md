@@ -2,7 +2,15 @@
 
 ## Endereços de Consulta
 
-### AC - Acre
+Cada unidade federativa está disposta em um tópico composto por
+* Sigla da UF
+* Nome da UF
+* Código da UF no IBGE (primeiros dois dígitos das chaves de acesso)
+
+----------
+
+
+### AC - Acre [12]
 
 http://sefaznet.ac.gov.br/nfce/consulta.xhtml
 
@@ -14,7 +22,7 @@ Sobre o site:
 
 > Data das informações: 09/2020
 
-### AL - Alagoas
+### AL - Alagoas [27]
 
 https://nfce.sefaz.al.gov.br/consultaNFCe.htm
 
@@ -25,7 +33,7 @@ Sobre o site:
 
 > Data das informações: 09/2020
 
-### AP - Amapá
+### AP - Amapá [16]
 
 http://www.sefaz.ap.gov.br/sate/seg/SEGf_AcessarFuncao.jsp?cdFuncao=FIS_1261
 > Frame: http://www.sefaz.ap.gov.br/sate/fis/FISf_ConsultarNFCE.do?limparSessao=true
@@ -37,7 +45,7 @@ Sobre o site:
 
 > Data das informações: 09/2020
 
-### AM - Amazonas
+### AM - Amazonas [13]
 
 https://sistemas.sefaz.am.gov.br/nfceweb/formConsulta.do
 
@@ -49,7 +57,7 @@ Sobre o site:
 
 > Data das informações: 09/2020
 
-### BA - Bahia
+### BA - Bahia [29]
 
 http://nfe.sefaz.ba.gov.br/servicos/nfce/Modulos/Geral/NFCEC_consulta_chave_acesso.aspx
 
@@ -65,7 +73,7 @@ Sobre o site:
 
 > Data das informações: 09/2020
 
-### CE - Ceará
+### CE - Ceará [23]
 
 https://cfe.sefaz.ce.gov.br/mfe/servicos#/cupom-fiscal
 
@@ -76,7 +84,7 @@ Sobre o site:
 
 > Data das informações: 09/2020
 
-### DF - Distrito Federal
+### DF - Distrito Federal [53]
 
 https://dec.fazenda.df.gov.br/NFCE/
 > IFrame: https://dec.fazenda.df.gov.br/AConsulta.aspx?tp=consultaCupom
@@ -89,7 +97,7 @@ Sobre o site:
 
 > Data das informações: 09/2020
 
-### ES - Espírito Santo
+### ES - Espírito Santo [32]
 
 http://app.sefaz.es.gov.br/ConsultaNFE/
 > Redireciona: https://dfe-portal.svrs.rs.gov.br/NFE/Consulta
@@ -105,7 +113,7 @@ Sobre o site:
 
 > Data das informações: 09/2020
 
-### GO - Goiás
+### GO - Goiás [52]
 
 http://www.nfce.go.gov.br/post/ver/214344/consulta-nfce
 
@@ -116,7 +124,7 @@ Sobre o site:
 
 > Data das informações: 09/2020
 
-### MA - Maranhão
+### MA - Maranhão [21]
 
 http://www.nfce.sefaz.ma.gov.br/portal/consultarnfce.jsp?method=preFilterCupom&dswid=-935
 
@@ -128,7 +136,7 @@ Sobre o site:
   
 > Data das informações: 09/2020
 
-### MT - Mato Grosso
+### MT - Mato Grosso [51]
 
 https://www.sefaz.mt.gov.br/nfce/consultanfce
 
@@ -139,7 +147,7 @@ Sobre o site:
 
 > Data das informações: 09/2020
 
-### MS - Mato Grosso do Sul
+### MS - Mato Grosso do Sul [50]
 
 http://www.dfe.ms.gov.br/nfe/consulta/
 
@@ -150,7 +158,7 @@ Sobre o site:
 
 > Data das informações: 09/2020
 
-### MG - Minas Gerais
+### MG - Minas Gerais [31]
 
 http://nfce.fazenda.mg.gov.br/portalnfce/sistema/consultaarg.xhtml
 
@@ -164,7 +172,7 @@ Sobre o site:
 
 > Data das informações: 09/2020
 
-### PA - Pará
+### PA - Pará [15]
 
 https://app.sefa.pa.gov.br/consulta-nfce/#/resumida
 
@@ -175,7 +183,7 @@ Sobre o site:
 
 > Data das informações: 09/2020
 
-### PB - Paraíba
+### PB - Paraíba [25]
 
 https://www.receita.pb.gov.br/ser/servirtual/documentos-fiscais/nfc-e/consultar-nfc-e
 > Não carrega, erro de SSL: ERR_SSL_PROTOCOL_ERROR
@@ -185,7 +193,7 @@ Sobre o site:
 
 > Data das informações: 09/2020
 
-### PR - Paraná
+### PR - Paraná [41]
 
 http://www.sped.fazenda.pr.gov.br/modules/conteudo/nfce.php?consulta=completa
 
@@ -197,7 +205,7 @@ Sobre o site:
 
 > Data das informações: 09/2020
 
-### PE - Pernambuco
+### PE - Pernambuco [26]
 
 http://nfce.sefaz.pe.gov.br/nfce/consulta
 
@@ -208,7 +216,7 @@ Sobre o site:
 
 > Data das informações: 09/2020
 
-### PI - Piaui
+### PI - Piaui [22]
 
 https://www.sefaz.pi.gov.br/nfce/consulta/
 
@@ -221,7 +229,7 @@ Sobre o site:
 
 > Data das informações: 09/2020
 
-### RJ - Rio de Janeiro
+### RJ - Rio de Janeiro [33]
 
 http://www4.fazenda.rj.gov.br/consultaDFe/paginas/consultaChaveAcesso.faces
 
@@ -232,7 +240,7 @@ Sobre o site:
 
 > Data das informações: 09/2020
 
-### RN - Rio Grande do Norte
+### RN - Rio Grande do Norte [24]
 
 https://nfce.set.rn.gov.br/portalDFE/NFCe/ConsultaNFCe.aspx
 
@@ -246,7 +254,7 @@ Sobre o site:
 
 > Data das informações: 09/2020
 
-### RS - Rio Grande do Sul
+### RS - Rio Grande do Sul [43]
 
 https://www.sefaz.rs.gov.br/dfe/Consultas/ConsultaPublicaDfe
 > IFrame: https://dfe-portal.svrs.rs.gov.br/Dfe/ConsultaPublicaDfe?chaveNFe=
@@ -262,7 +270,7 @@ Sobre o site:
 
 > Data das informações: 09/2020
 
-### RO - Rondônia
+### RO - Rondônia [11]
 
 https://www.nfce.sefin.ro.gov.br/home.jsp
 
@@ -273,7 +281,7 @@ Sobre o site:
 
 > Data das informações: 09/2020
 
-### RR - Roraima
+### RR - Roraima [14]
 
 https://portalapp.sefaz.rr.gov.br/nfce/consulta
 
@@ -284,7 +292,7 @@ Sobre o site:
 
 > Data das informações: 09/2020
 
-### SC - Santa Catarina
+### SC - Santa Catarina [42]
 
 https://tributario.sef.sc.gov.br/tax.NET/Sat.NFe.Web/Consultas/ConsultaPublicaNFe.aspx?amb=PROD
 
@@ -297,7 +305,7 @@ Sobre o site:
 
 > Data das informações: 09/2020
 
-### SP - São Paulo
+### SP - São Paulo [35]
 
 https://satsp.fazenda.sp.gov.br/COMSAT/Public/ConsultaPublica/ConsultaPublicaCfe.aspx
 
@@ -310,7 +318,7 @@ Sobre o site:
 
 > Data das informações: 09/2020
 
-### SE - Sergipe
+### SE - Sergipe [28]
 
 http://www.nfce.se.gov.br/portal/portalNoticias.jsp
 
@@ -321,7 +329,7 @@ Sobre o site:
 
 > Data das informações: 09/2020
 
-### TO - Tocantins
+### TO - Tocantins [17]
 
 http://www.sefaz.to.gov.br/nfce/consulta.jsf
 
