@@ -185,11 +185,22 @@ Sobre o site:
 
 ### PB - Paraíba [25]
 
+Site 1: (oficial)
 https://www.receita.pb.gov.br/ser/servirtual/documentos-fiscais/nfc-e/consultar-nfc-e
 > Não carrega, erro de SSL: ERR_SSL_PROTOCOL_ERROR
 
 Sobre o site:
 * ERR_SSL_PROTOCOL_ERROR 
+
+
+Site 2:
+https://www4.sefaz.pb.gov.br/atf/seg/SEGf_AcessarFuncao.jsp?cdFuncao=FIS_1410&chNFe=
+
+Sobre o site:
+* Server: Apache/2.4.6 (Red Hat)
+* X-Powered-By: JSP/2.2
+* Cookies: JSESSIONID
+* Tipo de Captcha: reCAPTCHA de imagens
 
 > Data das informações: 09/2020
 
