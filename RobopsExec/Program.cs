@@ -1,10 +1,7 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.IO;
-using System.IO.Compression;
 using System.Linq;
 using System.Text;
-using System.Xml.Serialization;
 using Net.RafaelEstevam.Spider.Helper;
 using Newtonsoft.Json;
 using Robops.Lib.Camara.Leg.API;
@@ -17,7 +14,8 @@ namespace RobopsExec
         static void Main(string[] args)
         {
             Console.WriteLine("Lendo deputados");
-
+            
+            // Coletado com coletarDeputadosApi()
             var deputados = Directory
                 .GetFiles(@"B:\Temp\api\deputados\", "*.json")
                 .Select(f => JsonConvert.DeserializeObject<Deputado>(File.ReadAllText(f)))
