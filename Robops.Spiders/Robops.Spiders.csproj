@@ -6,7 +6,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Net.RafaelEstevam.Spider.Simple.Lib" Version="0.5.347" />
+    <PackageReference Include="Net.RafaelEstevam.Spider.Simple.Lib" Version="0.6.365" />
   </ItemGroup>
 
   <ItemGroup>
