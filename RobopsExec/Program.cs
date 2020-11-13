@@ -2,8 +2,8 @@
 using System.IO;
 using System.Linq;
 using System.Text;
-using Net.RafaelEstevam.Spider.Helper;
 using Newtonsoft.Json;
+using RafaelEstevam.Simple.Spider.Helper;
 using Robops.Lib.Camara.Leg.API;
 using Robops.Spiders.Camara.Leg.Cota;
 

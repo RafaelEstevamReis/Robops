@@ -2,8 +2,8 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
-using Net.RafaelEstevam.Spider;
-using Net.RafaelEstevam.Spider.Wrappers.HTML;
+using RafaelEstevam.Simple.Spider;
+using RafaelEstevam.Simple.Spider.Wrappers.HTML;
 using Robops.Lib;
 using Robops.Lib.Camara.Leg;
 using Robops.Lib.Camara.Leg.Cota;
