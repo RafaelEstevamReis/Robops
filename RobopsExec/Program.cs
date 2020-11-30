@@ -1,4 +1,5 @@
 ﻿using System;
+using System.ComponentModel.DataAnnotations;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -14,7 +15,14 @@ namespace RobopsExec
         static void Main(string[] args)
         {
             Console.WriteLine("Lendo deputados");
-            
+
+            cruzaDeputadosCandidatos();
+
+            Console.WriteLine("Fim");
+        }
+
+        private static void cruzaDeputadosCandidatos()
+        {
             // Coletado com coletarDeputadosApi()
             var deputados = Directory
                 .GetFiles(@"B:\Temp\api\deputados\", "*.json")
@@ -37,11 +45,12 @@ namespace RobopsExec
                 if (deputados.ContainsKey(cpf))
                 {
                     var deputado = deputados[cpf];
-                    Console.WriteLine($"{deputado.dados.cpf} {deputado.dados.nomeCivil} -> {line[12]}/{line[14]} [{line[28]}]");
+                    Console.WriteLine($"{deputado.dados.id:000000} {deputado.dados.cpf} {deputado.dados.nomeCivil} -> {line[12]}/{line[14]} [{line[28]}]");
+
+                    string url = $"https://www.camara.leg.br/cota-parlamentar/sumarizado?nuDeputadoId={deputado.dados.id}&dataInicio=8/2020&dataFim=10/2020&despesa=&nomeHospede=&nomePassageiro=&nomeFornecedor=&cnpjFornecedor=&numDocumento=&sguf=&filtroNivel1=1&filtroNivel2=2&filtroNivel3=3";
+                    var document = FetchHelper.FetchResourceDocument(new Uri(url), enableCaching: true);
                 }
             }
-
-            Console.WriteLine("Fim");
         }
 
         private static void coletarDeputadosApi()
