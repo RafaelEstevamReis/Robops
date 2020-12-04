@@ -15,4 +15,8 @@
     <ProjectReference Include="..\Robops.Spiders\Robops.Spiders.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="PequenasBuscas\Al.MT\" />
+  </ItemGroup>
+
 </Project>
