@@ -2,6 +2,9 @@
 <head>
     <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
     <style>
+        button{
+            margin: 2px;
+        }
         div{
             margin:3px;
         }
@@ -12,10 +15,12 @@
     </style>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
     <script>
+        /* AUX */
         function explica(id){
             $("#explica").html($("#"+id).html());
             $("#explica").outerWidth($("#listaResultado").outerWidth());
         }
+
         function splitLines(t) { 
             return t.split(/\r\n|\r|\n/)
                     .filter((line) => { return line.trim().length > 0; }); 
@@ -31,19 +36,53 @@
             var setB = new Set(b);
             return [...new Set(a)].filter(x => setB.has(x));
         }
+        function toUpperList(list) { return list.map( (val) => {return val.toUpperCase(); } ) }
+    </script>
+    
+    <script>
+        /* Ajustes */
+        function ordenarListas(){
+            var text1 = $("#lista1").val();
+            var lista1 = splitLines(text1).sort();
+            $("#lista1").val(lista1.join("\n"));
+
+            var text2 = $("#lista2").val();
+            var lista2 = splitLines(text2).sort();
+            $("#lista2").val(lista2.join("\n"));
+        }
+
+    </script>
+
+    <script>
+        /* Ferramentas */
+        function compararListas(){
+            explica("comparaListas");
+
+            var text1 = $("#lista1").val().trim();
+            var text2 = $("#lista2").val().trim();
+            var lista1 = splitLines(text1);
+            var lista2 = splitLines(text2);
+            
+            var nomes1 = unique(toUpperList(firstName(lista1)));            
+            var nomes2 = unique(toUpperList(firstName(lista2)));
+            
+            var nomes = intersect(nomes1,nomes2).sort();
+
+            $("#listaResultado").text(nomes.join("\n"));
+        }
 
         function compararNomes(){
             explica("comparaPrimeiroNome");
 
-            var text1 = $("#lista1").val().trim().toUpperCase();
-            var text2 = $("#lista2").val().trim().toUpperCase();
+            var text1 = $("#lista1").val().trim();
+            var text2 = $("#lista2").val().trim();
             var lista1 = splitLines(text1);
             var lista2 = splitLines(text2);
             
-            var nomes1 = unique(firstName(lista1));            
-            var nomes2 = unique(firstName(lista2));
+            var nomes1 = unique(toUpperList(firstName(lista1)));            
+            var nomes2 = unique(toUpperList(firstName(lista2)));
             
-            var nomes = intersect(nomes1,nomes2);
+            var nomes = intersect(nomes1,nomes2).sort();
 
             $("#listaResultado").text("Nenhum resultado encontrado");
             if(nomes.length == 0) return;
@@ -51,10 +90,10 @@
             var finalText = "";
             nomes.forEach(element => {
                 var l1 = lista1.filter((line) => {
-                    return splitSpace(line)[0] == element;
+                    return splitSpace(line)[0].toUpperCase() == element;
                 });
                 var l2 = lista2.filter((line) => {
-                    return splitSpace(line)[0] == element;
+                    return splitSpace(line)[0].toUpperCase() == element;
                 });
 
                 l1.forEach(name => {
@@ -67,9 +106,6 @@
 
             $("#listaResultado").text(finalText);
         }
-
-
-
     </script>
 </head>
 <body>
@@ -84,8 +120,13 @@
             <textarea id="lista2" rows="20" cols="50"></textarea>
         </div>
         <div>
-            Opções:<br>
-            <button class="w3-button w3-black" onclick="compararNomes();">Comparar primeiro nome</button>
+            Ajustes<br>
+            <button class="w3-button w3-black" onclick="ordenarListas();">Ordenar Listas</button><br>
+
+            <hr>
+            Ferramentas:<br>
+            <button class="w3-button w3-black" onclick="compararListas();">Comparar Listagem</button><br>
+            <button class="w3-button w3-black" onclick="compararNomes();">Comparar Primeiro Nome</button><br>
         </div>
     </div>
     Resultado:<br>
@@ -97,11 +138,19 @@
     </div>
 
     <div class="textoExplica" id="comparaPrimeiroNome">
-        <h2>Comparar primeiro nome</h2>
+        <h2>Comparar Primeiro Nome</h2>
         A comparação de primeiro nome vai verificar cada nome da lista 1 e da lista 2 
         e procurar todos que tem o primeiro nome igual.
         <br>
-        Depois serão listados todos os primeiros nomes, e para cada um em qual lista apareceu
+        Depois serão listados todos os primeiros nomes, e para cada um em qual lista 
+        apareceu e em ordem alfabética
+    </div>    
+    <div class="textoExplica" id="comparaListas">
+        <h2>Comparar Listagem</h2>
+        A comparação listas vai verificar cada nome da lista 1 e da lista 2 
+        e procurar todos que tem o nome igual.
+        <br>
+        São exibidos todos os itens que estão nas duas listas e em ordem alfabética
     </div>
 </body>
 </html>
