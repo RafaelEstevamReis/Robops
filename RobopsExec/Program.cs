@@ -16,11 +16,30 @@ namespace RobopsExec
         {
             Console.WriteLine("Lendo deputados");
 
-            cruzaDeputadosCandidatos();
+            comparaListasNomes(File.ReadAllLines(@"B:\Temp\Deputados ALMT.csv"),
+                               File.ReadAllLines(@"B:\Temp\lotacionograma.csv"));           
 
             Console.WriteLine("Fim");
         }
 
+        private static void comparaListasNomes(string[] Lista1, string[] Lista2)
+        {
+            var l1 = Lista1.Where(l => !string.IsNullOrWhiteSpace(l))
+                           .OrderBy(o => o);
+            var l2 = Lista2.Where(l => !string.IsNullOrWhiteSpace(l))
+                           .OrderBy(o => o);
+
+            // caso tenha CamelCase, pode ser que sejam localizados nomes grudados
+
+            // Passe 1, acha primeiro nome
+            var primeirosNomes = Lista1.Select(l => l.Split(' ')[0].ToLower())
+                                       .Intersect(
+                                            Lista2.Select(l => l.Split(' ')[0].ToLower())
+                                       )
+                                       .ToArray();
+
+            primeirosNomes = primeirosNomes;
+        }
         private static void cruzaDeputadosCandidatos()
         {
             // Coletado com coletarDeputadosApi()

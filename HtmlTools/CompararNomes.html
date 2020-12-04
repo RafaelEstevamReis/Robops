@@ -1,0 +1,79 @@
+<html>
+<head>
+    <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
+    <style>
+        div{
+            margin:3px;
+        }
+    </style>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script>
+        function splitLines(t) { return (t+"").split(/\r\n|\r|\n/); }
+        function splitSpace(t) { return t.split(" "); }
+        function unique(list) { return [...new Set(list)]; }
+        function firstName(list) { 
+            return list.map( (line) => {
+                return splitSpace(line)[0];
+            });
+        }
+        function intersect(a, b) {
+            var setB = new Set(b);
+            return [...new Set(a)].filter(x => setB.has(x));
+        }
+
+        function compararNomes(){
+            var text1 = $("#lista1").val().trim().toUpperCase();
+            var text2 = $("#lista2").val().trim().toUpperCase();
+            var lista1 = splitLines(text1);
+            var lista2 = splitLines(text2);
+            
+            var nomes1 = unique(firstName(lista1));            
+            var nomes2 = unique(firstName(lista2));
+            
+            var nomes = intersect(nomes1,nomes2);
+
+            var finalText = "";
+            nomes.forEach(element => {
+                var l1 = lista1.filter((line) => {
+                    return splitSpace(line)[0] == element;
+                });
+                var l2 = lista2.filter((line) => {
+                    return splitSpace(line)[0] == element;
+                });
+
+                l1.forEach(name => {
+                    finalText += " 1> "+name+"\n";
+                });
+                l2.forEach(name => {
+                    finalText += " 2> "+name+"\n";
+                });                
+            });
+
+            $("#listaResultado").text(finalText);
+        }
+    </script>
+</head>
+<body>
+    Entrada:<br>
+    <div style="display: flex;">
+        <div>
+            Lista 1:<br>
+            <textarea id="lista1" rows="20" cols="50"></textarea>
+        </div>
+        <div>
+            Lista 2:<br>
+            <textarea id="lista2" rows="20" cols="50"></textarea>
+        </div>
+        <div>
+            Opções:<br>
+            <button class="w3-button w3-black" onclick="compararNomes();">Comparar primeiro nome</button>
+        </div>
+    </div>
+    Resultado:<br>
+    <div style="display: flex;">
+        <div>
+            <textarea id="listaResultado" rows="15" cols="50" readonly></textarea>
+        </div>
+    </div>
+</body>
+</html>
