@@ -45,25 +45,25 @@
             
             var nomes = intersect(nomes1,nomes2);
 
-            var finalText = "Nenhum resultado encontrado";
-            if(nomes.length > 0){
-                finalText = "";
-                nomes.forEach(element => {
-                    var l1 = lista1.filter((line) => {
-                        return splitSpace(line)[0] == element;
-                    });
-                    var l2 = lista2.filter((line) => {
-                        return splitSpace(line)[0] == element;
-                    });
+            $("#listaResultado").text("Nenhum resultado encontrado");
+            if(nomes.length == 0) return;
 
-                    l1.forEach(name => {
-                        finalText += " 1> "+name+"\n";
-                    });
-                    l2.forEach(name => {
-                        finalText += " 2> "+name+"\n";
-                    });                
+            var finalText = "";
+            nomes.forEach(element => {
+                var l1 = lista1.filter((line) => {
+                    return splitSpace(line)[0] == element;
                 });
-            }
+                var l2 = lista2.filter((line) => {
+                    return splitSpace(line)[0] == element;
+                });
+
+                l1.forEach(name => {
+                    finalText += " 1> "+name+"\n";
+                });
+                l2.forEach(name => {
+                    finalText += " 2> "+name+"\n";
+                });                
+            });
 
             $("#listaResultado").text(finalText);
         }
