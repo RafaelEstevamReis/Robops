@@ -2,8 +2,9 @@
 <head>
     <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
     <style>
-        button{
+        .w3-button{
             margin: 2px;
+            width: 275px;
         }
         div{
             margin:3px;
@@ -37,6 +38,12 @@
             return [...new Set(a)].filter(x => setB.has(x));
         }
         function toUpperList(list) { return list.map( (val) => {return val.toUpperCase(); } ) }
+
+        function getUniqueUpperLines(id){
+            var text = $("#"+id).val().trim();
+            var lista = splitLines(text);            
+            return unique(toUpperList(firstName(lista)));            
+        }
     </script>
     
     <script>
@@ -58,13 +65,8 @@
         function compararListas(){
             explica("comparaListas");
 
-            var text1 = $("#lista1").val().trim();
-            var text2 = $("#lista2").val().trim();
-            var lista1 = splitLines(text1);
-            var lista2 = splitLines(text2);
-            
-            var nomes1 = unique(toUpperList(firstName(lista1)));            
-            var nomes2 = unique(toUpperList(firstName(lista2)));
+            var nomes1 = getUniqueUpperLines("lista1");
+            var nomes2 = getUniqueUpperLines("lista2");
             
             var nomes = intersect(nomes1,nomes2).sort();
 
@@ -74,13 +76,8 @@
         function compararNomes(){
             explica("comparaPrimeiroNome");
 
-            var text1 = $("#lista1").val().trim();
-            var text2 = $("#lista2").val().trim();
-            var lista1 = splitLines(text1);
-            var lista2 = splitLines(text2);
-            
-            var nomes1 = unique(toUpperList(firstName(lista1)));            
-            var nomes2 = unique(toUpperList(firstName(lista2)));
+            var nomes1 = getUniqueUpperLines("lista1");
+            var nomes2 = getUniqueUpperLines("lista2");
             
             var nomes = intersect(nomes1,nomes2).sort();
 
@@ -106,6 +103,40 @@
 
             $("#listaResultado").text(finalText);
         }
+        
+        function compararBuscaTexto(){
+            explica("comparaBuscaTextoCom");
+
+            var par = $("#comparaBuscaTextoParam").val().toUpperCase();
+            $("#comparaBuscaTextoComReplace").text(par);
+            
+            if(par.length == 0){                
+                $("#listaResultado").text("");
+                return;
+            }
+
+            var nomes1 = getUniqueUpperLines("lista1");
+            var nomes2 = getUniqueUpperLines("lista2");
+            
+            var finalText = "";
+
+            var l1 = nomes1.filter((line) => {
+                return splitSpace(line)[0].toUpperCase().includes(par);
+            });
+            var l2 = nomes2.filter((line) => {
+                return splitSpace(line)[0].toUpperCase().includes(par);
+            });
+
+            l1.forEach(name => {
+                finalText += " 1> "+name+"\n";
+            });
+            l2.forEach(name => {
+                finalText += " 2> "+name+"\n";
+            }); 
+
+            $("#listaResultado").text(finalText);
+        }
+    
     </script>
 </head>
 <body>
@@ -127,6 +158,10 @@
             Ferramentas:<br>
             <button class="w3-button w3-black" onclick="compararListas();">Comparar Listagem</button><br>
             <button class="w3-button w3-black" onclick="compararNomes();">Comparar Primeiro Nome</button><br>
+            <div class="w3-button w3-black" onclick="compararBuscaTexto();">
+                Ambas contém: 
+                <input id="comparaBuscaTextoParam" type="text" style="width:100px" placeholder="_______" onchange="compararBuscaTexto();">
+            </div><br>
         </div>
     </div>
     Resultado:<br>
@@ -155,6 +190,13 @@
         e procurar todos que tem o nome igual.
         <br>
         São exibidos todos os itens que estão nas duas listas e em ordem alfabética
+    </div>    
+    <div class="textoExplica" id="comparaBuscaTextoCom">
+        <h2>Ambas Contém: <span id="comparaBuscaTextoComReplace"></span></h2>
+        A comparação listas vai verificar cada nome da lista 1 e da lista 2 
+        e procurar todos que contenham o texto informado.
+        <br><br>
+        O texto deve ter ao menos um caractere
     </div>
 </body>
 </html>
