@@ -16,6 +16,13 @@
     </style>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
     <script>
+        /* UI */
+        function doLoad(){
+            $("#lista1").val(localStorage.getItem("list1"));
+            $("#lista2").val(localStorage.getItem("list2"));
+        }
+    </script>
+    <script>
         /* AUX */
         function explica(id){
             $("#explica").html($("#"+id).html());
@@ -36,6 +43,10 @@
         function intersect(a, b) {
             var setB = new Set(b);
             return [...new Set(a)].filter(x => setB.has(x));
+        }
+        function except(a, b) {
+            var setB = new Set(b);
+            return [...new Set(a)].filter(x => !setB.has(x));
         }
         function toUpperList(list) { return list.map( (val) => {return val.toUpperCase(); } ) }
         
@@ -158,21 +169,24 @@
 
             var match = intersect(unique(palavras1),
                                   unique(palavras2));
-            
+
+            match = except(match, ["DA", "DE", "DO",
+                                   "DAS","DES","DOS"]);
+
             $("#listaResultado").text(match.join('\n'));
         }
     </script>
 </head>
-<body>
+<body onload="doLoad();">
     Preencha as listas 1 e 2 com os dados a confrontar, e ao lado, utilize os <b>Ajustes</b> para modificar as listas e as as <b>Ferramentas</b> para aplicar<br>
     <div style="display: flex;">
         <div>
             Lista 1:<br>
-            <textarea id="lista1" rows="20" cols="50"></textarea>
+            <textarea id="lista1" rows="20" cols="50" onblur="localStorage.setItem('list1', this.value);"></textarea>
         </div>
         <div>
             Lista 2:<br>
-            <textarea id="lista2" rows="20" cols="50"></textarea>
+            <textarea id="lista2" rows="20" cols="50" onblur="localStorage.setItem('list2', this.value);"></textarea>
         </div>
         <div>
             Ajustes<br>
@@ -208,21 +222,21 @@
         Hack: A comparação de primeiro nome, quebra cada item em seu primeiro espaço. <br>
         Se a lista for, por exemplo, CPF [espaço] Nome, ele vai comparar o CPF, pois é 
         a primeira coisa separada por um espaço
-    </div>     
+    </div>
     <div class="textoExplica" id="comparaListas">
         <h2>Comparar Listagem</h2>
         A comparação de listas vai verificar cada nome da lista 1 e da lista 2 
         e procurar todos que tem o nome igual.
         <br>
         São exibidos todos os itens que estão nas duas listas e em ordem alfabética
-    </div>    
+    </div>
     <div class="textoExplica" id="comparaBuscaTextoCom">
         <h2>Alguma Contém: <span id="comparaBuscaTextoComReplace"></span></h2>
         A busca vai verificar cada nome da lista 1 e da lista 2 
         e procurar todos que contenham o texto informado.
         <br><br>
         O texto deve ter ao menos um caractere
-    </div>    
+    </div>
     <div class="textoExplica" id="comparaPalavras">
         <h2>Buscar Palavras</h2>
         A pesquisa vai verificar cada palavra da lista 1 e da lista 2 
@@ -232,5 +246,6 @@
         <br><br>
         Utilize os resultados desta busca na "Ambas Contém" para procurar quem são
     </div>
+    <center>Os últimos valores das listas são armazenados no seu navegador e não trafegam na internet</center>
 </body>
 </html>
