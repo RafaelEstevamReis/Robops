@@ -38,11 +38,17 @@
             return [...new Set(a)].filter(x => setB.has(x));
         }
         function toUpperList(list) { return list.map( (val) => {return val.toUpperCase(); } ) }
-
-        function getUniqueUpperLines(id){
+        
+        function getUniqueUpperLine(id){
             var text = $("#"+id).val().trim();
             var lista = splitLines(text);            
-            return unique(toUpperList(firstName(lista)));            
+            return unique(toUpperList(lista));
+        }
+
+        function getUniqueUpperFirstNames(id){
+            var text = $("#"+id).val().trim();
+            var lista = splitLines(text);            
+            return unique(toUpperList(firstName(lista)));
         }
     </script>
     
@@ -65,8 +71,8 @@
         function compararListas(){
             explica("comparaListas");
 
-            var nomes1 = getUniqueUpperLines("lista1");
-            var nomes2 = getUniqueUpperLines("lista2");
+            var nomes1 = getUniqueUpperLine("lista1");
+            var nomes2 = getUniqueUpperLine("lista2");
             
             var nomes = intersect(nomes1,nomes2).sort();
 
@@ -76,8 +82,8 @@
         function compararNomes(){
             explica("comparaPrimeiroNome");
 
-            var nomes1 = getUniqueUpperLines("lista1");
-            var nomes2 = getUniqueUpperLines("lista2");
+            var nomes1 = getUniqueUpperFirstNames("lista1");
+            var nomes2 = getUniqueUpperFirstNames("lista2");
             
             var nomes = intersect(nomes1,nomes2).sort();
 
@@ -115,8 +121,8 @@
                 return;
             }
 
-            var nomes1 = getUniqueUpperLines("lista1");
-            var nomes2 = getUniqueUpperLines("lista2");
+            var nomes1 = getUniqueUpperFirstNames("lista1");
+            var nomes2 = getUniqueUpperFirstNames("lista2");
             
             var finalText = "";
 
@@ -137,6 +143,24 @@
             $("#listaResultado").text(finalText);
         }
     
+        function compararPalavras(){
+            explica("comparaPalavras");
+
+            var nomes1 = getUniqueUpperLine("lista1");
+            var nomes2 = getUniqueUpperLine("lista2");
+
+            palavras1 = nomes1.map( (line) => {
+                return splitSpace(line);
+            }).reduce(function(a,b) { return a.concat(b); } );
+            palavras2 = nomes2.map( (line) => {
+                return splitSpace(line);
+            }).reduce(function(a,b) { return a.concat(b); } );
+
+            var match = intersect(unique(palavras1),
+                                  unique(palavras2));
+            
+            $("#listaResultado").text(match.join('\n'));
+        }
     </script>
 </head>
 <body>
@@ -162,6 +186,7 @@
                 Ambas contém: 
                 <input id="comparaBuscaTextoParam" type="text" style="width:100px" placeholder="_______" onchange="compararBuscaTexto();">
             </div><br>
+            <button class="w3-button w3-black" onclick="compararPalavras();">Buscar palavras</button><br>
         </div>
     </div>
     Resultado:<br>
@@ -186,17 +211,26 @@
     </div>     
     <div class="textoExplica" id="comparaListas">
         <h2>Comparar Listagem</h2>
-        A comparação listas vai verificar cada nome da lista 1 e da lista 2 
+        A comparação de listas vai verificar cada nome da lista 1 e da lista 2 
         e procurar todos que tem o nome igual.
         <br>
         São exibidos todos os itens que estão nas duas listas e em ordem alfabética
     </div>    
     <div class="textoExplica" id="comparaBuscaTextoCom">
         <h2>Ambas Contém: <span id="comparaBuscaTextoComReplace"></span></h2>
-        A comparação listas vai verificar cada nome da lista 1 e da lista 2 
+        A busca vai verificar cada nome da lista 1 e da lista 2 
         e procurar todos que contenham o texto informado.
         <br><br>
         O texto deve ter ao menos um caractere
+    </div>    
+    <div class="textoExplica" id="comparaPalavras">
+        <h2>Buscar Palavras</h2>
+        A pesquisa vai verificar cada palavra da lista 1 e da lista 2 
+        e procurar todas as palavras que aparecem em ambas as listas
+        <br><br>
+        Utilize para procurar ocorrências de nomes e partes de sobrenomes
+        <br><br>
+        Utilize os resultados desta busca na "Ambas Contém" para procurar quem são
     </div>
 </body>
 </html>
