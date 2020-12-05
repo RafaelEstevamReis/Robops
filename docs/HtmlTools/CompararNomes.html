@@ -125,23 +125,26 @@
             explica("comparaBuscaTextoCom");
 
             var par = $("#comparaBuscaTextoParam").val().toUpperCase();
-            $("#comparaBuscaTextoComReplace").text(par);
+            par = par.replace(',',' ')
+                     .split(' ')
+                     .filter( val => { return val.trim().length > 0; } );
+
+            $("#comparaBuscaTextoComReplace").text(par.join(', '));
             
             if(par.length == 0){                
                 $("#listaResultado").text("");
                 return;
             }
-
             var nomes1 = getUniqueUpperLine("lista1");
             var nomes2 = getUniqueUpperLine("lista2");
             
             var finalText = "";
 
             var l1 = nomes1.filter((line) => {
-                return splitSpace(line.toUpperCase()).includes(par);
+                return splitSpace(line.toUpperCase()).some((a) => par.includes(a));
             });
             var l2 = nomes2.filter((line) => {
-                return splitSpace(line.toUpperCase()).includes(par);
+                return splitSpace(line.toUpperCase()).some((a) => par.includes(a));
             });
 
             l1.forEach(name => {
@@ -198,8 +201,8 @@
             <button class="w3-button w3-black" onclick="compararPalavras();">Buscar Palavras</button><br>
             <button class="w3-button w3-black" onclick="compararNomes();">Comparar Primeiro Nome</button><br>
             <div class="w3-button w3-black" onclick="compararBuscaTexto();">
-                Alguma contém: 
-                <input id="comparaBuscaTextoParam" type="text" style="width:100px" placeholder="_______" onchange="compararBuscaTexto();">
+                Alguma contém: <br>
+                <input id="comparaBuscaTextoParam" type="text" style="width:auto" placeholder="___, ___, ___" onchange="compararBuscaTexto();">
             </div><br>
         </div>
     </div>
@@ -233,9 +236,9 @@
     <div class="textoExplica" id="comparaBuscaTextoCom">
         <h2>Alguma Contém: <span id="comparaBuscaTextoComReplace"></span></h2>
         A busca vai verificar cada nome da lista 1 e da lista 2 
-        e procurar todos que contenham o texto informado.
+        e procurar todos que contenham alguma das palavras informadas.
         <br><br>
-        O texto deve ter ao menos um caractere
+        As palavras devem ter ao menos um caractere
     </div>
     <div class="textoExplica" id="comparaPalavras">
         <h2>Buscar Palavras</h2>
