@@ -121,16 +121,16 @@
                 return;
             }
 
-            var nomes1 = getUniqueUpperFirstNames("lista1");
-            var nomes2 = getUniqueUpperFirstNames("lista2");
+            var nomes1 = getUniqueUpperLine("lista1");
+            var nomes2 = getUniqueUpperLine("lista2");
             
             var finalText = "";
 
             var l1 = nomes1.filter((line) => {
-                return splitSpace(line)[0].toUpperCase().includes(par);
+                return splitSpace(line.toUpperCase()).includes(par);
             });
             var l2 = nomes2.filter((line) => {
-                return splitSpace(line)[0].toUpperCase().includes(par);
+                return splitSpace(line.toUpperCase()).includes(par);
             });
 
             l1.forEach(name => {
@@ -181,7 +181,7 @@
             <hr>
             Ferramentas:<br>
             <button class="w3-button w3-black" onclick="compararListas();">Comparar Listagem</button><br>
-            <button class="w3-button w3-black" onclick="compararPalavras();">Buscar palavras</button><br>
+            <button class="w3-button w3-black" onclick="compararPalavras();">Buscar Palavras</button><br>
             <button class="w3-button w3-black" onclick="compararNomes();">Comparar Primeiro Nome</button><br>
             <div class="w3-button w3-black" onclick="compararBuscaTexto();">
                 Ambas contém: 
