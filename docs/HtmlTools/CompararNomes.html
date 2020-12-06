@@ -125,8 +125,7 @@
             explica("comparaBuscaTextoCom");
 
             var par = $("#comparaBuscaTextoParam").val().toUpperCase();
-            par = par.replace(',',' ')
-                     .split(' ')
+            par = par.split(',')
                      .filter( val => { return val.trim().length > 0; } );
 
             $("#comparaBuscaTextoComReplace").text(par.join(', '));
@@ -141,10 +140,14 @@
             var finalText = "";
 
             var l1 = nomes1.filter((line) => {
-                return splitSpace(line.toUpperCase()).some((a) => par.includes(a));
+                //return splitSpace(line.toUpperCase())
+                //        .some((a) => par.includes(a))
+                return checkLineBuscaTexto(line, par);
             });
             var l2 = nomes2.filter((line) => {
-                return splitSpace(line.toUpperCase()).some((a) => par.includes(a));
+                //return splitSpace(line.toUpperCase())
+                //        .some((a) => par.includes(a));
+                return checkLineBuscaTexto(line, par);
             });
 
             l1.forEach(name => {
@@ -155,6 +158,18 @@
             }); 
 
             $("#listaResultado").text(finalText);
+        }
+        function checkLineBuscaTexto(line, par){
+            var palavra = splitSpace(line.toUpperCase())
+                        .some((a) => par.includes(a));
+            if(palavra) return true;
+
+            for(let i in par){
+                if(par[i].indexOf(' ') < 0) continue;
+                if(line.indexOf(par[i]) !== -1) return true;
+            };
+
+            return false;
         }
     
         function compararPalavras(){
@@ -243,7 +258,7 @@
         e procurar todos que contenham alguma das palavras informadas.
         <br><br>
         As palavras devem ter ao menos um caractere<br>
-        As palavras podem ser separadas tanto por virgulas quanto por espaços
+        As palavras podem ser separadas tanto por virgulas
     </div>
     <div class="textoExplica" id="comparaPalavras">
         <h2>Buscar Palavras</h2>
