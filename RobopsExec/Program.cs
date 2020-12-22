@@ -14,10 +14,12 @@ namespace RobopsExec
     {
         static void Main(string[] args)
         {
-            Console.WriteLine("Lendo deputados");
+            Console.WriteLine("Lendo Senadores");
 
-            comparaListasNomes(File.ReadAllLines(@"B:\Temp\Deputados ALMT.csv"),
-                               File.ReadAllLines(@"B:\Temp\lotacionograma.csv"));           
+            var cat = new Robops.Spiders.Senado.Leg.Pessoal.CatalogarFuncionariosSenadores();
+            cat.Catalogar(2020);
+                
+
 
             Console.WriteLine("Fim");
         }
