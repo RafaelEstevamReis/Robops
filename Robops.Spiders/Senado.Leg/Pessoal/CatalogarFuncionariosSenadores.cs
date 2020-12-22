@@ -50,12 +50,21 @@ namespace Robops.Spiders.Senado.Leg.Pessoal
 
         private void Spider_FetchCompleted(object Sender, FetchCompleteEventArgs args)
         {
+            var senador = new Lib.Senado.Leg.Senador()
+            {
+                CodigoSenador = ConversionHelper.ToInt(args.Link.Uri.Segments[3].Replace("/", ""), 0),
+            };
+            
             var hObj = args.GetHObject();
-            var dadosPessoais = hObj["div"].OfClass("dadosPessoais"); // < div class="dadosPessoais">
 
-            var funcionarios = new List<Lib.Senado.Leg.FuncionarioGabinete>();
+            var dl_dd = hObj["dd"].ToArray();
+            senador.NomeCivil = dl_dd[0].Trim();
+            senador.Nascimento = dl_dd[1].Trim();
+            senador.Naturalidade = dl_dd[2].Trim();
+            senador.LocalGabinete = dl_dd[3].Trim();
 
             // funcionários
+            var funcionarios = new List<Lib.Senado.Leg.FuncionarioGabinete>();
             var todosTrs = hObj["tr"];
             foreach (var linha in todosTrs)
             {
@@ -66,15 +75,22 @@ namespace Robops.Spiders.Senado.Leg.Pessoal
                 }
 
                 var id = ConversionHelper.ToInt(tds[0]["a"].GetHrefValue().Split('=')[1], 0);
-
-                funcionarios.Add(new Lib.Senado.Leg.FuncionarioGabinete()
+                var func = new Lib.Senado.Leg.FuncionarioGabinete()
                 {
+                    Senador = senador.CodigoSenador,
                     CodigoFuncionario = id,
                     Nome = tds[0]["span"].GetValue(),
                     Funcao = tds[1].GetValue(),
                     NomeFuncao = tds[2].GetValue(),
-                });
+                };
+
+                if(funcionarios.Any( o => o.CodigoFuncionario == id)) continue;
+
+                funcionarios.Add(func);
             }
+            senador.Gabinete = funcionarios.ToArray();
+
+            senadores.Add(senador);
         }
     }
 }

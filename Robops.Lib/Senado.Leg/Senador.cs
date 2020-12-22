@@ -3,7 +3,10 @@
     public class Senador
     {
         public int CodigoSenador { get; set; }
-
+        public string NomeCivil { get; set; }
+        public string Nascimento { get; set; }
+        public string Naturalidade { get; set; }
+        public string LocalGabinete { get; set; }
 
         public FuncionarioGabinete[] Gabinete { get; set; }
     }
