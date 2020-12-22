@@ -9,5 +9,10 @@
         public string LocalGabinete { get; set; }
 
         public FuncionarioGabinete[] Gabinete { get; set; }
+
+        public override string ToString()
+        {
+            return $"{CodigoSenador} {NomeCivil}";
+        }
     }
 }

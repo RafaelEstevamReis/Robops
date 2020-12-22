@@ -7,5 +7,10 @@
         public string Nome { get; set; }
         public string Funcao { get; set; }
         public string NomeFuncao { get; set; }
+
+        public override string ToString()
+        {
+            return $"{CodigoFuncionario} {Funcao} {Nome}";
+        }
     }
 }

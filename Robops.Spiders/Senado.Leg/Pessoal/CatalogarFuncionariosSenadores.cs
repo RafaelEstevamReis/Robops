@@ -9,11 +9,11 @@ namespace Robops.Spiders.Senado.Leg.Pessoal
 {
     public class CatalogarFuncionariosSenadores
     {
-        List<Lib.Senado.Leg.Senador> senadores;
+        public List<Lib.Senado.Leg.Senador> Senadores;
 
         public void Catalogar(int ano)
         {
-            senadores = new List<Lib.Senado.Leg.Senador>();
+            Senadores = new List<Lib.Senado.Leg.Senador>();
 
             // obter listagem
             var page = FetchHelper.FetchResourceDocument(new Uri("https://www25.senado.leg.br/web/transparencia/sen/"), 
@@ -60,7 +60,7 @@ namespace Robops.Spiders.Senado.Leg.Pessoal
             var dl_dd = hObj["dd"].ToArray();
             senador.NomeCivil = dl_dd[0].Trim();
             senador.Nascimento = dl_dd[1].Trim();
-            senador.Naturalidade = dl_dd[2].Trim();
+            senador.Naturalidade = dl_dd[2].Trim().Replace("\t", "");
             senador.LocalGabinete = dl_dd[3].Trim();
 
             // funcionários
@@ -90,7 +90,7 @@ namespace Robops.Spiders.Senado.Leg.Pessoal
             }
             senador.Gabinete = funcionarios.ToArray();
 
-            senadores.Add(senador);
+            Senadores.Add(senador);
         }
     }
 }

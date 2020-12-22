@@ -18,8 +18,8 @@ namespace RobopsExec
 
             var cat = new Robops.Spiders.Senado.Leg.Pessoal.CatalogarFuncionariosSenadores();
             cat.Catalogar(2020);
-                
 
+            var dados = cat.Senadores;
 
             Console.WriteLine("Fim");
         }
