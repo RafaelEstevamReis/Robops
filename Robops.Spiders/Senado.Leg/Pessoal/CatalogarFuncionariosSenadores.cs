@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using RafaelEstevam.Simple.Spider;
 using RafaelEstevam.Simple.Spider.Helper;
+using RafaelEstevam.Simple.Spider.Extensions;
 using RafaelEstevam.Simple.Spider.Wrappers.HTML;
 
 namespace Robops.Spiders.Senado.Leg.Pessoal
@@ -16,7 +17,7 @@ namespace Robops.Spiders.Senado.Leg.Pessoal
             Senadores = new List<Lib.Senado.Leg.Senador>();
 
             // obter listagem
-            var page = FetchHelper.FetchResourceDocument(new Uri("https://www25.senado.leg.br/web/transparencia/sen/"), 
+            var page = FetchHelper.FetchResourceDocument(new Uri("https://www25.senado.leg.br/web/transparencia/sen/"),
                                                          enableCaching: true);
             var select = new Select(page.DocumentNode.SelectSingleNode("//select"));
             var idsSenadores = select.GetItems()
@@ -52,15 +53,15 @@ namespace Robops.Spiders.Senado.Leg.Pessoal
         {
             var senador = new Lib.Senado.Leg.Senador()
             {
-                CodigoSenador = ConversionHelper.ToInt(args.Link.Uri.Segments[3].Replace("/", ""), 0),
+                CodigoSenador = ConversionHelper.ToInt(args.Link.Parts[3], 0),
             };
-            
+
             var hObj = args.GetHObject();
 
             var dl_dd = hObj["dd"].ToArray();
             senador.NomeCivil = dl_dd[0].Trim();
             senador.Nascimento = dl_dd[1].Trim();
-            senador.Naturalidade = dl_dd[2].Trim().Replace("\t", "");
+            senador.Naturalidade = TextExtensions.RemoveExcessiveWhitespaces(dl_dd[2]);
             senador.LocalGabinete = dl_dd[3].Trim();
 
             // funcionários
@@ -84,7 +85,7 @@ namespace Robops.Spiders.Senado.Leg.Pessoal
                     NomeFuncao = tds[2].GetValue(),
                 };
 
-                if(funcionarios.Any( o => o.CodigoFuncionario == id)) continue;
+                if (funcionarios.Any(o => o.CodigoFuncionario == id)) continue;
 
                 funcionarios.Add(func);
             }

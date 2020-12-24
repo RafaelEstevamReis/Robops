@@ -21,6 +21,23 @@ namespace RobopsExec
 
             var dados = cat.Senadores;
 
+            var codFuncionarios = dados.SelectMany(s => s.Gabinete)
+                                       .Select(f => f.CodigoFuncionario)
+                                       .Distinct()
+                                       .ToArray();
+
+            codFuncionarios = codFuncionarios;
+            StringBuilder sb = new StringBuilder();
+            int count = 0;
+            foreach (var c in codFuncionarios)
+            {
+                if (count > 0 && count % 10 == 0) sb.AppendLine();
+                count++;
+
+                sb.Append($"{c}, ");
+            }
+            var txt = sb.ToString();
+
             Console.WriteLine("Fim");
         }
 
