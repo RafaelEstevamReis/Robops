@@ -9,6 +9,7 @@
     <PackageReference Include="RafaelEstevam.Simple.Spider" Version="0.7.484" />
     <PackageReference Include="RafaelEstevam.Simple.Spider.SqliteStorage" Version="0.8.3" />
     <PackageReference Include="RafaelEstevam.WebDriverController" Version="0.2.18" />
+    <PackageReference Include="Simple.Sqlite" Version="0.4.43" />
   </ItemGroup>
 
   <ItemGroup>

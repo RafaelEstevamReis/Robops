@@ -12,6 +12,13 @@ namespace Robops.Lib
             if (s.Contains("R$")) s = s.Split('$')[1];
             return decimal.Parse(s, ptBR);
         }
+        public static decimal ParseDecimal(string s, decimal Error)
+        {
+            if (s.Contains("R$")) s = s.Split('$')[1];
+            if (decimal.TryParse(s, NumberStyles.Any, ptBR, out decimal val))
+                return val;
+            return Error;
+        }
 
         public static DateTime ParseDatetime(string s)
         {

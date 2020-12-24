@@ -12,6 +12,10 @@ namespace Robops.Lib
         {
             return LocalizationHelper.ParseDecimal(s);
         }
+        public static decimal ToDecimal(this string s, decimal Error)
+        {
+            return LocalizationHelper.ParseDecimal(s, Error);
+        }
         public static DateTime ToDateTime(this string s)
         {
             return LocalizationHelper.ParseDatetime(s);

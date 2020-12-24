@@ -7,6 +7,7 @@ using Newtonsoft.Json;
 using RafaelEstevam.Simple.Spider.Helper;
 using Robops.Lib.Camara.Leg.API;
 using Robops.Spiders.Camara.Leg.Cota;
+using Robops.Spiders.Senado.Leg.Pessoal;
 
 namespace RobopsExec
 {
@@ -16,29 +17,47 @@ namespace RobopsExec
         {
             Console.WriteLine("Lendo Senadores");
 
-            var cat = new Robops.Spiders.Senado.Leg.Pessoal.CatalogarFuncionariosSenadores();
-            cat.Catalogar(2020);
+            processaDadosFolha(11, 2020);
+
+            Console.WriteLine("Fim");
+        }
+        private static void processaDadosFolha(int mes, int ano)
+        {
+            Simple.Sqlite.SqliteDB db = new Simple.Sqlite.SqliteDB("senadoresFolha.db");
+            db.CreateTables()
+              .Add<Robops.Lib.Senado.Leg.Folha>()
+              .Commit();
+
+            var cat = new CatalogarFuncionariosSenadores();
+            cat.Catalogar(ano);
 
             var dados = cat.Senadores;
 
-            var codFuncionarios = dados.SelectMany(s => s.Gabinete)
-                                       .Select(f => f.CodigoFuncionario)
-                                       .Distinct()
-                                       .ToArray();
+            var jaTem = db.GetAll<Robops.Lib.Senado.Leg.Folha>()
+                          .Select(o => o.CodigoFuncionario)
+                          .ToHashSet();
 
-            codFuncionarios = codFuncionarios;
-            StringBuilder sb = new StringBuilder();
-            int count = 0;
-            foreach (var c in codFuncionarios)
-            {
-                if (count > 0 && count % 10 == 0) sb.AppendLine();
-                count++;
+            var funcionarios = dados.SelectMany(s => s.Gabinete)
+                                    .Distinct()
+                                    .Where(o => !jaTem.Contains(o.CodigoFuncionario)) // não já foi
+                                    //.Take(500) // lotes ...
+                                    .ToArray();
+            var codFuncionarios = funcionarios
+                                    .Select(f => f.CodigoFuncionario)
+                                    .ToArray();
 
-                sb.Append($"{c}, ");
-            }
-            var txt = sb.ToString();
-
-            Console.WriteLine("Fim");
+            var itensFolha = CatalogarDadosFolha.CarregarFolhaFuncionarios(codFuncionarios, mes, ano);
+            db.BulkInsert(itensFolha);
+            // adicoina os faltantes
+            var semInformacao = funcionarios
+                                    .Where(f => !itensFolha.Any(iF => iF.CodigoFuncionario == f.CodigoFuncionario))
+                                    .Select(func => new Robops.Lib.Senado.Leg.Folha()
+                                    {
+                                        CodigoFuncionario = func.CodigoFuncionario,
+                                        Referencia = new DateTime(ano, mes, 1)
+                                    })
+                                    .ToArray();
+            db.BulkInsert(semInformacao);
         }
 
         private static void comparaListasNomes(string[] Lista1, string[] Lista2)
