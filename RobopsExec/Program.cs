@@ -17,7 +17,7 @@ namespace RobopsExec
         {
             Console.WriteLine("Lendo Senadores");
 
-            processaDadosFolha(11, 2020);
+            processaDadosFolha(8, 2020);
 
             Console.WriteLine("Fim");
         }
@@ -25,6 +25,8 @@ namespace RobopsExec
         {
             Simple.Sqlite.SqliteDB db = new Simple.Sqlite.SqliteDB("senadoresFolha.db");
             db.CreateTables()
+              //.Add<Robops.Lib.Senado.Leg.Senador>()
+              //.Add<Robops.Lib.Senado.Leg.FuncionarioGabinete>()
               .Add<Robops.Lib.Senado.Leg.Folha>()
               .Commit();
 
@@ -34,12 +36,12 @@ namespace RobopsExec
             var dados = cat.Senadores;
 
             var jaTem = db.GetAll<Robops.Lib.Senado.Leg.Folha>()
-                          .Select(o => o.CodigoFuncionario)
+                          .Select(o => $"{o.CodigoFuncionario}-{o.Referencia.Year}-{o.Referencia.Month}")
                           .ToHashSet();
 
             var funcionarios = dados.SelectMany(s => s.Gabinete)
                                     .Distinct()
-                                    .Where(o => !jaTem.Contains(o.CodigoFuncionario)) // não já foi
+                                    .Where(o => !jaTem.Contains($"{o.CodigoFuncionario}-{ano}-{mes}")) // não já foi
                                     //.Take(500) // lotes ...
                                     .ToArray();
             var codFuncionarios = funcionarios

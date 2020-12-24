@@ -8,7 +8,7 @@
         public string Naturalidade { get; set; }
         public string LocalGabinete { get; set; }
 
-        public FuncionarioGabinete[] Gabinete { get; set; }
+        public FuncionarioGabinete[] Gabinete;
 
         public override string ToString()
         {

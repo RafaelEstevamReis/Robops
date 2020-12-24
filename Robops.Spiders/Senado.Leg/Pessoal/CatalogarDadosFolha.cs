@@ -16,7 +16,7 @@ namespace Robops.Spiders.Senado.Leg.Pessoal
         public static Folha[] CarregarFolhaFuncionarios(int[] cods, int mes, int ano)
         {
             // inicializa
-            var valDate = $"01/{mes}/{ano}";
+            var valDate = $"01/{mes:00}/{ano}";
             var lstfolha = new List<Folha>();
             using IWebDriver driver = new ChromeDriver();
             var ctr = new WDController(driver);
@@ -138,6 +138,7 @@ namespace Robops.Spiders.Senado.Leg.Pessoal
                         folha.ImpostoRenda = valor;
                         break;
                     case "inss":
+                    case "inss grat natalina":
                         folha.INSS = valor;
                         break;
                     case "psss":
