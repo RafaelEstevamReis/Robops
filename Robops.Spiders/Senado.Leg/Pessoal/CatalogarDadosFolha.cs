@@ -4,8 +4,8 @@ using OpenQA.Selenium;
 using OpenQA.Selenium.Chrome;
 using RafaelEstevam.Simple.Spider.Helper;
 using RafaelEstevam.Simple.Spider.Wrappers;
-using RafaelEstevam.WebDriverController.Lib;
-using RafaelEstevam.WebDriverController.Lib.Actions;
+using RafaelEstevam.WebDriverController;
+using RafaelEstevam.WebDriverController.Actions;
 using Robops.Lib;
 using Robops.Lib.Senado.Leg;
 
@@ -19,7 +19,7 @@ namespace Robops.Spiders.Senado.Leg.Pessoal
             var valDate = $"01/{mes:00}/{ano}";
             var lstfolha = new List<Folha>();
             using IWebDriver driver = new ChromeDriver();
-            var ctr = new WDController(driver);
+            var ctr = new Controller(driver);
 
             // navega pro captcha e aguarda o preenchimento do primeiro
             ctr.Do(new Redirect(buildStartUrl(cods[0])));
@@ -45,7 +45,7 @@ namespace Robops.Spiders.Senado.Leg.Pessoal
             return lstfolha.ToArray();
         }
 
-        private static void processaCodigo(List<Folha> lstfolha, WDController ctr, int cod, DateTime periodo)
+        private static void processaCodigo(List<Folha> lstfolha, Controller ctr, int cod, DateTime periodo)
         {
             ctr.Do(new Redirect(buildUrl(cod)))
                // processa a resposta
@@ -56,9 +56,9 @@ namespace Robops.Spiders.Senado.Leg.Pessoal
                        return ctr.FirstElementOrDefault(By.ClassName("rodape_tabela_resposta")) != null;
                    },
                    // havendo dados...
-                   (wc, wd) =>
+                   (ctr) =>
                    {
-                       var doc = HtmlParseHelper.ParseHtmlDocument(wc.PageSource);
+                       var doc = HtmlParseHelper.ParseHtmlDocument(ctr.PageSource);
                        var hObj = new HObject(doc);
 
                        // //section/div/div/div/
