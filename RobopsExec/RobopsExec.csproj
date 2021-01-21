@@ -8,7 +8,7 @@
 
   <ItemGroup>
     <PackageReference Include="RafaelEstevam.Simple.Spider" Version="0.7.501" />
-    <PackageReference Include="RafaelEstevam.Simple.Spider.SqliteStorage" Version="0.8.4" />
+    <PackageReference Include="RafaelEstevam.Simple.Spider.SqliteStorage" Version="0.8.5" />
   </ItemGroup>
 
   <ItemGroup>
