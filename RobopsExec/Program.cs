@@ -15,9 +15,10 @@ namespace RobopsExec
     {
         static void Main(string[] args)
         {
-            Console.WriteLine("Lendo Senadores");
+            Console.WriteLine("Lendo dados");
 
-            processaDadosFolha(8, 2020);
+            //processaDadosFolha(8, 2020);
+            Robops.Spiders.Transparencia.Servidores.Consulta.run();
 
             Console.WriteLine("Fim");
         }
