@@ -2,6 +2,7 @@
 using System.ComponentModel.DataAnnotations;
 using System.IO;
 using System.Linq;
+using System.Net;
 using System.Text;
 using Newtonsoft.Json;
 using RafaelEstevam.Simple.Spider.Helper;
@@ -17,8 +18,24 @@ namespace RobopsExec
         {
             Console.WriteLine("Lendo dados");
 
-            //processaDadosFolha(8, 2020);
-            Robops.Spiders.Transparencia.Servidores.Consulta.run();
+            while (true)
+            {
+                //processaDadosFolha(8, 2020);
+                try
+                {
+                    Robops.Spiders.Transparencia.Servidores.Consulta.run();
+                    break;
+                }
+                catch (WebException)
+                {
+                    Console.WriteLine("WebException -> Restarting");
+                    // restart
+                    continue;
+                }
+                catch (Exception)
+                {
+                }
+            }
 
             Console.WriteLine("Fim");
         }

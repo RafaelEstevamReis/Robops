@@ -10,15 +10,18 @@ namespace Robops.Spiders.Transparencia.Servidores
         public static void run()
         {
             var db = new NoSqliteStorage("robops_servidores.db");
-            int comecarPagina = 600;
+            var cfg = new ConfigurationDB("robops_servidores.db");
+
+            int comecarPagina = cfg.ReadConfig("LastPage","", 1440);
             // catalogar todos os servidores
             for (int i = comecarPagina; ; i++)
             {
                 var resultado = FetchHelper.FetchResourceJson<ConsultaServidores>(buildJsonUri(i));
 
                 Console.WriteLine($"{DateTime.Now.ToLongTimeString()} Pagina {i} - {resultado.data.Length} lidos");
-
                 db.Store(resultado.data, d => d.id);
+                cfg.SetConfig("LastPage", "", i);
+
                 //foreach (var d in resultado.data)
                 //{
                 //    db.Store(d.id, d);
