@@ -116,6 +116,7 @@ Sobre o site:
 ### GO - Goiás [52]
 
 http://www.nfce.go.gov.br/post/ver/214344/consulta-nfce
+> Site fora do ar
 
 Sobre o site:
 * Não tem o servidor
@@ -123,6 +124,13 @@ Sobre o site:
 * Tipo de Captcha: reCAPTCHA de imagens
 
 > Data das informações: 09/2020
+
+http://nfe.sefaz.go.gov.br/nfeweb/sites/nfe/consulta-completa
+
+Sobre o site:
+* Tipo de Captcha: reCAPTCHA de imagens
+
+> Data das informações: 01/2021
 
 ### MA - Maranhão [21]
 
