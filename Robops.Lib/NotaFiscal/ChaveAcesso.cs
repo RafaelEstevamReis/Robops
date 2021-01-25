@@ -118,7 +118,7 @@ namespace Robops.Lib.NotaFiscal
             }
             // Checa o Ano da data
             int ano = int.Parse(Chave[2..4]);
-            if (ano < AnoCorrenteYY) return false;
+            if (ano > AnoCorrenteYY) return false;
 
             // Checa UF
             if (!UFs.Contains(Chave[0..2])) return false;
@@ -155,6 +155,15 @@ namespace Robops.Lib.NotaFiscal
             int dv = 11 - resto;
 
             return (char)('0' + dv);
+        }
+
+        public static string LimparChaveAcesso(string chave)
+        {
+            return chave.Replace(" ", "")
+                        .Replace("/", "")
+                        .Replace("-", "")
+                        .Replace("(", "")
+                        .Replace(")", "");
         }
     }
 }
