@@ -12,7 +12,7 @@ namespace Robops.Spiders.Transparencia.Servidores
             var db = new NoSqliteStorage("robops_servidores.db");
             var cfg = new ConfigurationDB("robops_servidores.db");
 
-            int comecarPagina = cfg.ReadConfig("LastPage","", 1440);
+            int comecarPagina = cfg.GetConfig("LastPage","", 1440);
             // catalogar todos os servidores
             for (int i = comecarPagina; ; i++)
             {
