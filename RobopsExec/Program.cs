@@ -9,6 +9,7 @@ using RafaelEstevam.Simple.Spider.Helper;
 using Robops.Lib.Camara.Leg.API;
 using Robops.Spiders.Camara.Leg.Cota;
 using Robops.Spiders.Senado.Leg.Pessoal;
+using Simple.Sqlite;
 
 namespace RobopsExec
 {
@@ -16,26 +17,13 @@ namespace RobopsExec
     {
         static void Main(string[] args)
         {
+            Console.WriteLine("Preparando banco de dados");
+            SqliteDB db = new SqliteDB("servidores_arquivo.db");
+
+            Console.WriteLine($"BD: {db.DatabaseFileName}");
             Console.WriteLine("Lendo dados");
 
-            while (true)
-            {
-                //processaDadosFolha(8, 2020);
-                try
-                {
-                    Robops.Spiders.Transparencia.Servidores.Consulta.run();
-                    break;
-                }
-                catch (WebException)
-                {
-                    Console.WriteLine("WebException -> Restarting");
-                    // restart
-                    continue;
-                }
-                catch (Exception)
-                {
-                }
-            }
+            Robops.Spiders.Transparencia.Servidores.CarregaArquivoBaixado.run(db);
 
             Console.WriteLine("Fim");
         }
