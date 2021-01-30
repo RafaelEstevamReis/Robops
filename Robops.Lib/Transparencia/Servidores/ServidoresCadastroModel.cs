@@ -1,7 +1,18 @@
-﻿namespace Robops.Lib.Transparencia.Servidores
+﻿using System.ComponentModel.DataAnnotations;
+
+namespace Robops.Lib.Transparencia.Servidores
 {
     public class ServidoresCadastroModel
     {
+        public string UIID
+        {
+            get
+            {
+                return $"{Matricula_3D[..3]}:{ID_ServidorPortal}";
+            }
+            set {; }
+        }
+
         public int ID_ServidorPortal { get; set; }
         public string Nome { get; set; }
         public string CPF_6D { get; set; }
