@@ -8,6 +8,11 @@ namespace Robops.Lib
         {
             return int.Parse(Text);
         }
+        public static int ToInt(this string Text, int Error)
+        {
+            if (int.TryParse(Text, out int val)) return val;
+            return 0;
+        }
         public static decimal ToDecimal(this string s)
         {
             return LocalizationHelper.ParseDecimal(s);
