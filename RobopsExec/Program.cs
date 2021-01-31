@@ -18,18 +18,18 @@ namespace RobopsExec
         static void Main(string[] args)
         {
             Console.WriteLine("Preparando banco de dados");
-            SqliteDB db = new SqliteDB("servidores_arquivo.db");
+            SqliteDB db = new SqliteDB("auxilio_arquivo.db");
 
             Console.WriteLine($"BD: {db.DatabaseFileName}");
             Console.WriteLine("Lendo dados");
 
-            Robops.Spiders.Transparencia.Servidores.CarregaArquivoBaixado.run(db);
+            Robops.Spiders.Transparencia.AuxilioEmergencial.CarregaArquivoBaixado.run(db);
 
             Console.WriteLine("Fim");
         }
         private static void processaDadosFolha(int mes, int ano)
         {
-            Simple.Sqlite.SqliteDB db = new Simple.Sqlite.SqliteDB("senadoresFolha.db");
+            SqliteDB db = new SqliteDB("senadoresFolha.db");
             db.CreateTables()
               //.Add<Robops.Lib.Senado.Leg.Senador>()
               //.Add<Robops.Lib.Senado.Leg.FuncionarioGabinete>()
