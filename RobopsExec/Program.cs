@@ -17,6 +17,7 @@ namespace RobopsExec
     {
         static void Main(string[] args)
         {
+            SqliteDB.EnabledDatabaseBackup = false; // 5GB é muito, deixa quieto
             Console.WriteLine("Preparando banco de dados");
             SqliteDB db = new SqliteDB("auxilio_arquivo.db");
 

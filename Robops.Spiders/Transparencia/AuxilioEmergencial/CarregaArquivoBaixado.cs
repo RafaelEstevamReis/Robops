@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Text;
 using RafaelEstevam.Simple.Spider.Helper;
 using Robops.Lib;
@@ -12,7 +13,7 @@ namespace Robops.Spiders.Transparencia.AuxilioEmergencial
 {
     public class CarregaArquivoBaixado
     {
-        static HashSet<string> uids;
+        static HashSet<long> uids;
         static int qtd = 0;
         public static void run(Simple.Sqlite.SqliteDB db)
         {
@@ -20,11 +21,19 @@ namespace Robops.Spiders.Transparencia.AuxilioEmergencial
               .Add<AuxilioModel>()
               .Commit();
 
-            Console.WriteLine("Entre com a pasta:");
-            string pasta = Console.ReadLine();
+            string pasta = "";
+            while (!Directory.Exists(pasta))
+            {
+                Console.WriteLine("Entre com a pasta:");
+                pasta = Console.ReadLine();
+            }
 
-            uids = new HashSet<string>();
-
+            {
+                // recovery from where it stopped
+                var allNis = db.ExecuteQuery<string>("SELECT NIS FROM AuxilioModel WHERE NIS IS NOT NULL", null)
+                               .Select(nis => long.Parse(nis));
+                uids = new HashSet<long>(allNis);
+            }
 
             processaPasta(pasta, db);
         }
@@ -32,6 +41,11 @@ namespace Robops.Spiders.Transparencia.AuxilioEmergencial
         {
             foreach (var arquivo in Directory.GetFiles(pasta, "*.zip"))
             {
+                if (arquivo.Contains("202004")) continue; // already done
+                if (arquivo.Contains("202005")) continue; // already done
+                if (arquivo.Contains("202006")) continue; // already done
+                if (arquivo.Contains("202007")) continue; // already done
+
                 processaArquivo(arquivo,  db);
             }
         }
@@ -46,7 +60,11 @@ namespace Robops.Spiders.Transparencia.AuxilioEmergencial
             var zipLines = zip.ReadLines();
             var rows = CSVHelper.DelimiterSplit(zipLines, ';');
 
-            var buffer = new DataBuffer<AuxilioModel>(20000, data => db.BulkInsert(data, addReplace: true));
+            var buffer = new DataBuffer<AuxilioModel>(20000, data =>
+            {
+                db.BulkInsert(data, addReplace: true);
+                Console.WriteLine($"# Data Write ");
+            });
             foreach (var row in rows)
             {
                 var cad = new AuxilioModel()
@@ -70,13 +88,14 @@ namespace Robops.Spiders.Transparencia.AuxilioEmergencial
                 if (cad.CPF_6D_Responsavel == cad.NIS) cad.CPF_6D_Responsavel = null;
                 if (cad.Nome_Responsavel == cad.Nome) cad.Nome_Responsavel = null;
 
-                //if (uids.Contains(cad.Key())) continue;
-                //uids.Add(cad.Key());
+                qtd++;
+                if (qtd % buffer.Quantity == 0) Console.WriteLine($"{DateTime.Now.ToLongTimeString()} Processado: {qtd:N0} {cad.Nome}");
+
+                if (uids.Contains(cad.Key())) continue;
+                uids.Add(cad.Key());
 
                 buffer.Add(cad);
-                qtd++;
 
-                if (qtd % buffer.Quantity == 0) Console.WriteLine($"{DateTime.Now.ToLongTimeString()} Processado: {qtd:N0} {cad.Nome}");
             }
             buffer.Flush();
         }

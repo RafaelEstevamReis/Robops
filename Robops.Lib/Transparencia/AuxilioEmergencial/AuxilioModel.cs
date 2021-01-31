@@ -16,10 +16,11 @@ namespace Robops.Lib.Transparencia.AuxilioEmergencial
         public string Nome_Responsavel { get; set; }
         public string Enquadramento { get; set; }
 
-        string key = null;
-        public string Key()
+        long key = 0;
+        public long Key()
         {
-            if (key == null) key = $"{Municipio}{NIS}{CPF_6D}{Nome.Split(' ')[0]}";
+            if (NIS == null) return 0;
+            if (key == 0) key = long.Parse(NIS);
             return key;
         }
 
