@@ -27,6 +27,7 @@ namespace Robops.Lib.NotaFiscal
 
         public string sUF { get; }
         public string sDataEmissao { get; }
+        public DateTime DataEmissao => new DateTime(sDataEmissao[0..2].ToInt(), sDataEmissao[2..4].ToInt(), 1);
         public string sCNPJ { get; }
         public string sModelo { get; }
         public ModeloNota Modelo { get; }
