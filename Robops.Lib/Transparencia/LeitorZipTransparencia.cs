@@ -28,7 +28,7 @@ namespace Robops.Lib.Transparencia
                     if (!ShouldProcessFile(entry.Name)) continue;
                 }
 
-                InicioLeituraArquivo?.Invoke(this, entry.Name);
+                InicioLeituraArquivo?.Invoke(this, entry.FullName);
 
                 using var sr = new StreamReader(entry.Open(), Encoding.UTF7);
                 //pula o cabeçalho
