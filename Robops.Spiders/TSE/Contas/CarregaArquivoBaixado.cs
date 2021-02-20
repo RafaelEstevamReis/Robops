@@ -19,10 +19,12 @@ namespace Robops.Spiders.TSE.Contas
               .Commit();
             string path;
 
-            foreach (var file in Directory.GetFiles(@"N:\Organizando\Dados Crawlers\TSE\", "*.zip"))
-            {
-                processaArquivo(db, file);
-            }
+            //foreach (var file in Directory.GetFiles(@"N:\Organizando\Dados Crawlers\TSE\", "*.zip"))
+            //{
+            //    processaArquivo(db, file);
+            //}
+
+            processaArquivo2018_2020(db, @"N:\Organizando\Dados Crawlers\TSE\prestacao_de_contas_eleitorais_candidatos_2020.zip");
 
         }
 
@@ -50,6 +52,7 @@ namespace Robops.Spiders.TSE.Contas
                                   CodigoEleicao = row[5].ToInt(),
                                   UF = row[12],
                                   NumeroCandidato = row[19].ToInt(),
+                                  NomeCandidato = row[20],
                                   DocumentoDoador = row[36],
                                   NomeDoadorRFB = row[38],
                                   Valor = row[56].ToDecimal(0),

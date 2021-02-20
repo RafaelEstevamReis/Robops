@@ -7,6 +7,7 @@ using System.Text;
 using Newtonsoft.Json;
 using RafaelEstevam.Simple.Spider.Helper;
 using Robops.Lib.Camara.Leg.API;
+using Robops.Lib.Camara.Leg.Gabinete;
 using Robops.Spiders.Camara.Leg.Cota;
 using Robops.Spiders.Senado.Leg.Pessoal;
 using Simple.Sqlite;
@@ -19,16 +20,61 @@ namespace RobopsExec
         {
             SqliteDB.EnabledDatabaseBackup = false; // 5GB é muito, deixa quieto
             Console.WriteLine("Preparando banco de dados");
-            SqliteDB db = new SqliteDB("gabinete_camara.db");
-
-            Console.WriteLine($"BD: {db.DatabaseFileName}");
+            //SqliteDB db = new SqliteDB("gabinete_camara.db");
+            //SqliteDB db = new SqliteDB("doacoes_2020.db");
+            
+            //Console.WriteLine($"BD: {db.DatabaseFileName}");
             Console.WriteLine("Lendo dados");
 
-            Robops.Spiders.Camara.Leg.Gabinete.ColetarPessoal.run(db);
-            //Robops.Spiders.TSE.Contas.CarregaArquivoBaixado.run(db);
+
+            //SqliteDB dbGabinete = new SqliteDB("gabinete_camara.db");
+            //SqliteDB dbDoacoes = new SqliteDB("doacoes_2020.db");
+            //Robops.Spiders.Camara.Leg.Gabinete.ColetarPessoal.run(dbGabinete);
+            //Robops.Spiders.TSE.Contas.CarregaArquivoBaixado.run(dbDoacoes);
+            //compararGabineteDoacoes();
 
             Console.WriteLine("Fim");
         }
+
+        private static void compararGabineteDoacoes()
+        {
+            Console.WriteLine("Abrindo bancos");
+            SqliteDB dbGabinete = new SqliteDB("gabinete_camara.db");
+            SqliteDB dbDoacoes = new SqliteDB("doacoes_2020.db");
+            Console.WriteLine("Selecionando doadores");
+            var modelDoacoes = dbDoacoes.GetAll<Robops.Lib.TSE.Contas.ReceitasModel>()
+                                        .Where(o => o.DocumentoDoador.Length == 11)
+                                        .GroupBy(o => o.DocumentoDoador)
+                                        .SelectMany(g => g)
+                                        .OrderBy(o => o.NomeDoadorRFB)
+                                        .ToArray();
+            Console.WriteLine("Selecionando pessoal");
+            var gabinete = dbGabinete.GetAll<PessoalModel>()
+                                     .ToArray();
+            var hashNomesGabinete = gabinete.Select(o => o.NomeFuncionario.ToUpper())
+                                            .ToHashSet();
+            
+            Console.WriteLine("Executando busca");
+            foreach (var doador in modelDoacoes)
+            {
+                if (!hashNomesGabinete.Contains(doador.NomeDoadorRFB.ToUpper())) continue;
+
+                var gab = gabinete.First(g => g.NomeFuncionario.ToUpper() == doador.NomeDoadorRFB.ToUpper());
+                // ele pode doar para si mesmo
+                if (gab.NomeFuncionario.ToUpper() == doador.NomeCandidato.ToUpper()) continue;
+
+                Console.WriteLine($"Checar funcionário {doador.NomeDoadorRFB}");
+                Console.WriteLine($" > Deputado: {gab.NomeDeputado} | {gab.InicioExercicio} até {gab.FimExercicio}");
+                Console.WriteLine($" > Candidato: {doador.NomeCandidato}/{doador.UF}");
+
+                File.AppendAllLines("doadores.txt", new string[]{
+                    $"Checar funcionário {doador.NomeDoadorRFB}",
+                    $" > Deputado: {gab.NomeDeputado} | {gab.InicioExercicio} até {gab.FimExercicio}",
+                    $" > Candidato: {doador.NomeCandidato}/{doador.UF}",
+                });
+            }
+        }
+
         private static void processaDadosFolha(int mes, int ano)
         {
             SqliteDB db = new SqliteDB("senadoresFolha.db");
@@ -50,7 +96,7 @@ namespace RobopsExec
             var funcionarios = dados.SelectMany(s => s.Gabinete)
                                     .Distinct()
                                     .Where(o => !jaTem.Contains($"{o.CodigoFuncionario}-{ano}-{mes}")) // não já foi
-                                    //.Take(500) // lotes ...
+                                                                                                       //.Take(500) // lotes ...
                                     .ToArray();
             var codFuncionarios = funcionarios
                                     .Select(f => f.CodigoFuncionario)

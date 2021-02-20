@@ -19,6 +19,7 @@
         public int CodigoEleicao { get; set; }
         public string UF { get; set; }
         public int NumeroCandidato { get; set; }
+        public string NomeCandidato { get; set; }
         public string DocumentoDoador { get; set; }
         public string NomeDoadorRFB { get; set; }
         public decimal Valor { get; set; }

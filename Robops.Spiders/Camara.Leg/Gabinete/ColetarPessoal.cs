@@ -46,6 +46,7 @@ namespace Robops.Spiders.Camara.Leg.Gabinete
             }
             else
             {
+                string nomeDeputado = hObj["h1"].Trim();
                 int ano = args.Link.Uri.ToString().Split('=')[1].ToInt();
                 int deputado = args.Link.Uri.ToString().Split('/')[4].ToInt();
                 var rows = hObj["tr"];
@@ -74,10 +75,12 @@ namespace Robops.Spiders.Camara.Leg.Gabinete
                     {
                         Ano = ano,
                         IdDeputado = deputado,
+                        NomeDeputado = nomeDeputado,
                         NomeFuncionario = cols[0],
                         GrupoFuncional = cols[1],
                         Cargo = cols[2],
-                        
+                        InicioExercicio = inicio,
+                        FimExercicio = fim,
                         UrlRemuneracao = "",
                     };
                     pessoas.Add(pessoa);
