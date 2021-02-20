@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using RafaelEstevam.Simple.Spider;
-using RafaelEstevam.Simple.Spider.Helper;
 using Robops.Lib;
 using Robops.Lib.Camara.Leg.Gabinete;
 using Simple.Sqlite;
@@ -38,7 +37,7 @@ namespace Robops.Spiders.Camara.Leg.Gabinete
             if (args.Link.EndsWith("/quem-sao"))
             {
                 var lista = hObj["select > #parametro-nome > option"].GetAttributeValues("value");
-                for (int ano = 2021; ano >= 2016; ano--)
+                for (int ano = 2021; ano >= 2020; ano--)
                 {
                     spider.AddPages(lista.Where(i => i.Length > 0)
                                          .Select(c => new Uri($"https://www.camara.leg.br/deputados/{c}/pessoal-gabinete?ano={ano}")),
@@ -70,11 +69,7 @@ namespace Robops.Spiders.Camara.Leg.Gabinete
                         inicio = datas[1].ToDateTime();
                         fim = datas[3].ToDateTime();
                     }
-                    else
-                    {
-                    }
 
-                    cols = cols;
                     var pessoa = new PessoalModel()
                     {
                         Ano = ano,
@@ -87,7 +82,7 @@ namespace Robops.Spiders.Camara.Leg.Gabinete
                     };
                     pessoas.Add(pessoa);
                 }
-                //db.BulkInsert(pessoas);
+                db.BulkInsert(pessoas);
             }
         }
     }
