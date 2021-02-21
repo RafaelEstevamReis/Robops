@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using RafaelEstevam.Simple.Spider;
 using Robops.Lib;
+using Robops.Lib.Camara.Leg;
 using Robops.Lib.Camara.Leg.Gabinete;
 using Simple.Sqlite;
 
@@ -16,6 +17,7 @@ namespace Robops.Spiders.Camara.Leg.Gabinete
             db = database;
             db.CreateTables()
               .Add<PessoalModel>()
+              .Add<Deputado>()
               .Commit();
 
             var init = InitializationParams.Default002()
@@ -37,6 +39,9 @@ namespace Robops.Spiders.Camara.Leg.Gabinete
             if (args.Link.EndsWith("/quem-sao"))
             {
                 var lista = hObj["select > #parametro-nome > option"].GetAttributeValues("value");
+                spider.AddPages(lista.Where(i => i.Length > 0)
+                                     .Select(c => new Uri($"https://www.camara.leg.br/deputados/{c}")),
+                                args.Link);
                 for (int ano = 2021; ano >= 2020; ano--)
                 {
                     spider.AddPages(lista.Where(i => i.Length > 0)
@@ -44,7 +49,7 @@ namespace Robops.Spiders.Camara.Leg.Gabinete
                                     args.Link);
                 }
             }
-            else
+            else if (args.Link.Contains("/pessoal-gabinete?"))
             {
                 string nomeDeputado = hObj["h1"].Trim();
                 int ano = args.Link.Uri.ToString().Split('=')[1].ToInt();
@@ -85,7 +90,50 @@ namespace Robops.Spiders.Camara.Leg.Gabinete
                     };
                     pessoas.Add(pessoa);
                 }
-                db.BulkInsert(pessoas);
+                db.BulkInsert(pessoas, addReplace: true);
+            }
+            else
+            {
+                //Página do deputado
+                int id = args.Link.Uri.ToString().Split('/')[4].ToInt();
+                Deputado dep = new Deputado()
+                {
+                    Id = id,
+                    Nome = hObj["h2 > #nomedeputado"].Trim(),
+                    PartidoLideranca = hObj["span > .foto-deputado__partido-estado"].Trim(),
+                };
+                foreach (var li in hObj["ul > .informacoes-deputado > li"])
+                {
+                    var hdr = li["span"].Trim();
+
+                    switch (hdr)
+                    {
+                        case "Nome Civil:":
+                            dep.NomeCivil = li.Children("#text").Trim();
+                            break;
+                        case "Telefone:":
+                            dep.Telefone = li.Children("#text").Trim();
+                            break;
+                        case "E-mail:":
+                            dep.EMail = li["a"].Trim();
+                            break;
+                        case "Endereço:":
+                            dep.Endereco = li.Children("#text").Trim();
+                            break;
+                        case "Data de Nascimento:":
+                            dep.DataNascimento = li.Children("#text").Trim().ToDateTime();
+                            break;
+                        case "Naturalidade:":
+                            dep.Naturalidade = li.Children("#text").Trim();
+                            dep.Naturalidade_UF = dep.Naturalidade.Split('-')[1].Trim();
+                            break;
+
+                        default:
+                            break;
+                    }
+                }
+
+                db.InsertOrReplace(dep);
             }
         }
     }

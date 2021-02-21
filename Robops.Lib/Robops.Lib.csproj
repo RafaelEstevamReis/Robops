@@ -4,4 +4,8 @@
     <TargetFramework>netcoreapp3.1</TargetFramework>
   </PropertyGroup>
 
+  <ItemGroup>
+    <PackageReference Include="Simple.Sqlite" Version="0.5.100" />
+  </ItemGroup>
+
 </Project>
