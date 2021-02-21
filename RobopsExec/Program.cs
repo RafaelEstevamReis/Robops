@@ -20,7 +20,6 @@ namespace RobopsExec
         {
             SqliteDB.EnabledDatabaseBackup = false; // 5GB é muito, deixa quieto
             Console.WriteLine("Preparando banco de dados");
-            //SqliteDB db = new SqliteDB("gabinete_camara.db");
             //SqliteDB db = new SqliteDB("doacoes_2020.db");
             
             //Console.WriteLine($"BD: {db.DatabaseFileName}");
@@ -28,8 +27,8 @@ namespace RobopsExec
 
 
             //SqliteDB dbGabinete = new SqliteDB("gabinete_camara.db");
-            //SqliteDB dbDoacoes = new SqliteDB("doacoes_2020.db");
             //Robops.Spiders.Camara.Leg.Gabinete.ColetarPessoal.run(dbGabinete);
+            //SqliteDB dbDoacoes = new SqliteDB("doacoes_2020.db");
             //Robops.Spiders.TSE.Contas.CarregaArquivoBaixado.run(dbDoacoes);
             //compararGabineteDoacoes();
 
@@ -42,10 +41,8 @@ namespace RobopsExec
             SqliteDB dbGabinete = new SqliteDB("gabinete_camara.db");
             SqliteDB dbDoacoes = new SqliteDB("doacoes_2020.db");
             Console.WriteLine("Selecionando doadores");
-            var modelDoacoes = dbDoacoes.GetAll<Robops.Lib.TSE.Contas.ReceitasModel>()
-                                        .Where(o => o.DocumentoDoador.Length == 11)
-                                        .GroupBy(o => o.DocumentoDoador)
-                                        .SelectMany(g => g)
+            var modelDoacoes = dbDoacoes.ExecuteQuery<Robops.Lib.TSE.Contas.ReceitasModel>("SELECT * FROM ReceitasModel WHERE length(DocumentoDoador) = 11 ", null)
+                                        .Where(o => o.Ano == 2020)
                                         .OrderBy(o => o.NomeDoadorRFB)
                                         .ToArray();
             Console.WriteLine("Selecionando pessoal");
@@ -53,7 +50,10 @@ namespace RobopsExec
                                      .ToArray();
             var hashNomesGabinete = gabinete.Select(o => o.NomeFuncionario.ToUpper())
                                             .ToHashSet();
-            
+
+            var deputados = dbGabinete.GetAll<Robops.Lib.Camara.Leg.Deputado>()
+                                      .ToDictionary(d => d.Id);
+
             Console.WriteLine("Executando busca");
             foreach (var doador in modelDoacoes)
             {
@@ -67,7 +67,13 @@ namespace RobopsExec
                 Console.WriteLine($" > Deputado: {gab.NomeDeputado} | {gab.InicioExercicio} até {gab.FimExercicio}");
                 Console.WriteLine($" > Candidato: {doador.NomeCandidato}/{doador.UF}");
 
-                File.AppendAllLines("doadores.txt", new string[]{
+                string fileName = "doadores.txt";
+                var deputado = deputados[gab.IdDeputado];
+
+                if (deputado.NomeCivil.ToUpper() == doador.NomeCandidato.ToUpper()) fileName = "doadores_pingPong.txt";
+                else fileName = "doadores_gramaVizinho.txt";
+
+                File.AppendAllLines(fileName, new string[]{
                     $"Checar funcionário {doador.NomeDoadorRFB}",
                     $" > Deputado: {gab.NomeDeputado} | {gab.InicioExercicio} até {gab.FimExercicio}",
                     $" > Candidato: {doador.NomeCandidato}/{doador.UF}",
