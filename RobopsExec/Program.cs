@@ -30,7 +30,7 @@ namespace RobopsExec
             //Robops.Spiders.Camara.Leg.Gabinete.ColetarPessoal.run(dbGabinete);
             //SqliteDB dbDoacoes = new SqliteDB("doacoes_2020.db");
             //Robops.Spiders.TSE.Contas.CarregaArquivoBaixado.run(dbDoacoes);
-            //compararGabineteDoacoes();
+            compararGabineteDoacoes();
 
             Console.WriteLine("Fim");
         }
@@ -63,21 +63,15 @@ namespace RobopsExec
                 // ele pode doar para si mesmo
                 if (gab.NomeFuncionario.ToUpper() == doador.NomeCandidato.ToUpper()) continue;
 
-                Console.WriteLine($"Checar funcionário {doador.NomeDoadorRFB}");
-                Console.WriteLine($" > Deputado: {gab.NomeDeputado} | {gab.InicioExercicio} até {gab.FimExercicio}");
-                Console.WriteLine($" > Candidato: {doador.NomeCandidato}/{doador.UF}");
-
-                string fileName = "doadores.txt";
+                string fileName = "doadores.csv";
                 var deputado = deputados[gab.IdDeputado];
 
-                if (deputado.NomeCivil.ToUpper() == doador.NomeCandidato.ToUpper()) fileName = "doadores_pingPong.txt";
-                else fileName = "doadores_gramaVizinho.txt";
+                if (deputado.NomeCivil.ToUpper() == doador.NomeCandidato.ToUpper()) fileName = "doadores_pingPong.csv";
+                else fileName = "doadores_gramaVizinho.csv";
 
-                File.AppendAllLines(fileName, new string[]{
-                    $"Checar funcionário {doador.NomeDoadorRFB}",
-                    $" > Deputado: {gab.NomeDeputado} | {gab.InicioExercicio} até {gab.FimExercicio}",
-                    $" > Candidato: {doador.NomeCandidato}/{doador.UF}",
-                });
+                string text = $"{doador.NomeDoadorRFB.ToUpper()};{gab.NomeDeputado.ToUpper()};{deputado.PartidoLideranca};{doador.NomeCandidato.ToUpper()};{doador.NumeroCandidato};{gab.InicioExercicio:d} - {gab.FimExercicio:d}\r\n";
+                Console.WriteLine(text);
+                File.AppendAllText(fileName, text);
             }
         }
 
