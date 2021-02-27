@@ -8,6 +8,7 @@ using Newtonsoft.Json;
 using RafaelEstevam.Simple.Spider.Helper;
 using Robops.Lib.Camara.Leg.API;
 using Robops.Lib.Camara.Leg.Gabinete;
+using Robops.Spiders.AL.MG;
 using Robops.Spiders.Camara.Leg.Cota;
 using Robops.Spiders.Senado.Leg.Pessoal;
 using Simple.Sqlite;
@@ -25,12 +26,7 @@ namespace RobopsExec
             //Console.WriteLine($"BD: {db.DatabaseFileName}");
             Console.WriteLine("Lendo dados");
 
-
-            //SqliteDB dbGabinete = new SqliteDB("gabinete_camara.db");
-            //Robops.Spiders.Camara.Leg.Gabinete.ColetarPessoal.run(dbGabinete);
-            //SqliteDB dbDoacoes = new SqliteDB("doacoes_2020.db");
-            //Robops.Spiders.TSE.Contas.CarregaArquivoBaixado.run(dbDoacoes);
-            compararGabineteDoacoes();
+            ColetarVerba.run(2020);
 
             Console.WriteLine("Fim");
         }
