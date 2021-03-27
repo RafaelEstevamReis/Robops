@@ -4,6 +4,7 @@ using System.Text;
 
 namespace Robops.Lib.Helpers
 {
+    [Obsolete]
     public class DataBuffer<T>
     {
         public int Quantity { get; }
