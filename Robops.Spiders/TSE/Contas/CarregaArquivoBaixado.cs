@@ -1,11 +1,9 @@
 ﻿using System;
-using System.IO;
-using System.Linq;
 using RafaelEstevam.Simple.Spider.Helper;
 using Robops.Lib;
-using Robops.Lib.Helpers;
 using Robops.Lib.Transparencia;
 using Robops.Lib.TSE.Contas;
+using Simple.DatabaseWrapper;
 using Simple.Sqlite;
 
 namespace Robops.Spiders.TSE.Contas

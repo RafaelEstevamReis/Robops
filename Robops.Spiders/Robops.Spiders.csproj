@@ -6,14 +6,18 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="RafaelEstevam.Simple.Spider" Version="0.7.521" />
-    <PackageReference Include="RafaelEstevam.Simple.Spider.SqliteStorage" Version="0.8.6" />
+    <PackageReference Include="RafaelEstevam.Simple.Spider" Version="0.8.1" />
+    <PackageReference Include="RafaelEstevam.Simple.Spider.SqliteStorage" Version="0.8.7" />
     <PackageReference Include="RafaelEstevam.WebDriverController" Version="0.2.44" />
-    <PackageReference Include="Simple.Sqlite" Version="0.5.100" />
+    <PackageReference Include="Simple.Sqlite" Version="0.6.1" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\Robops.Lib\Robops.Lib.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Extensions\" />
   </ItemGroup>
 
 </Project>

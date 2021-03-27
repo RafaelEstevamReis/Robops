@@ -5,9 +5,9 @@ using System.Linq;
 using System.Text;
 using RafaelEstevam.Simple.Spider.Helper;
 using Robops.Lib;
-using Robops.Lib.Helpers;
 using Robops.Lib.Transparencia;
 using Robops.Lib.Transparencia.AuxilioEmergencial;
+using Simple.DatabaseWrapper;
 
 namespace Robops.Spiders.Transparencia.AuxilioEmergencial
 {

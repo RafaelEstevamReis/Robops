@@ -3,9 +3,9 @@ using System.Collections.Generic;
 using System.IO;
 using RafaelEstevam.Simple.Spider.Helper;
 using Robops.Lib;
-using Robops.Lib.Helpers;
 using Robops.Lib.Transparencia;
 using Robops.Lib.Transparencia.Servidores;
+using Simple.DatabaseWrapper;
 
 namespace Robops.Spiders.Transparencia.Servidores
 {

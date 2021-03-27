@@ -1,5 +1,5 @@
 ﻿using System;
-using Simple.Sqlite.Attributes;
+using Simple.DatabaseWrapper.Attributes;
 
 namespace Robops.Lib.Camara.Leg
 {

@@ -7,7 +7,6 @@ using RafaelEstevam.Simple.Spider.Wrappers.HTML;
 using Robops.Lib;
 using Robops.Lib.Camara.Leg;
 using Robops.Lib.Camara.Leg.Cota;
-using Robops.Spiders.Extensions;
 
 namespace Robops.Spiders.Camara.Leg.Cota
 {
