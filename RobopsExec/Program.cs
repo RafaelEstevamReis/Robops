@@ -19,12 +19,11 @@ namespace RobopsExec
         {
             SqliteDB.EnabledDatabaseBackup = false; // 5GB é muito, deixa quieto
             Console.WriteLine("Preparando banco de dados");
-            //SqliteDB db = new SqliteDB("doacoes_2020.db");
-            
+            //SqliteDB db = new SqliteDB("doacoes_2020.db");            
             //Console.WriteLine($"BD: {db.DatabaseFileName}");
             Console.WriteLine("Lendo dados");
 
-            ColetarVerba.run(2020);
+            Robops.Spiders.Senado.Leg.Combustivel.CatalogaGastosVeiculo.run();
 
             Console.WriteLine("Fim");
         }
