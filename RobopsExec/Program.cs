@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using Newtonsoft.Json;
 using RafaelEstevam.Simple.Spider.Helper;
+using Robops.Lib;
 using Robops.Lib.Camara.Leg.API;
 using Robops.Lib.Camara.Leg.Gabinete;
 using Robops.Spiders.AL.MG;
@@ -23,11 +24,65 @@ namespace RobopsExec
             //Console.WriteLine($"BD: {db.DatabaseFileName}");
             Console.WriteLine("Lendo dados");
 
-            Robops.Spiders.Senado.Leg.Combustivel.CatalogaGastosVeiculo.run();
+            //Robops.Spiders.Senado.Leg.Combustivel.CatalogaGastosVeiculo.run();
+            processaCsvParaTxt();
 
             Console.WriteLine("Fim");
         }
 
+        private static void processaCsvParaTxt()
+        {
+            string[] meses = { 
+                "Janeiro", "Fevereiro", "Março", "Abril",
+                "Maio", "Junho", "Julho", "Agosto",
+                "Setembro", "Outubro", "Novembro", "Dezembro"
+            };
+            FastCsv csv = new FastCsv();
+            csv.Encoding = Encoding.UTF7;
+
+            var dados = csv.ReadDelimiter(File.OpenRead("teste.csv"))
+                           .Skip(1)
+                           .Select(l => new
+                           {
+                               Ano = l[0].ToInt(),
+                               Mes = l[1].ToInt(),
+                               Parlamentar = l[3],
+                               Valor = l[5].Trim().Replace("R$", "R$ "),
+                               Cnpj = l[6],
+                               Empresa = l[7],
+                           })
+                           .GroupBy(o => o.Parlamentar)
+                           .Select(o => new { Key = o.Key, Dados = o.ToArray() });
+
+            using var file = File.Open("dados.txt", FileMode.Create, FileAccess.Write);
+            using var sw = new StreamWriter(file);
+            foreach (var v in dados)
+            {
+                sw.WriteLine($"{v.Key}");
+                Console.WriteLine(v.Key);
+
+                var anos = v.Dados.GroupBy(o => o.Ano)
+                                  .Select(g => new
+                                  {
+                                      Ano = g.Key,
+                                      notas = g.OrderBy(o => o.Mes)
+                                  })
+                                  .OrderBy(o => o.Ano);
+
+                foreach (var ano in anos)
+                {
+                    //sw.WriteLine($"Em {ano.Ano}:");
+                    foreach (var nota in ano.notas)
+                    {
+                        sw.WriteLine($"{meses[nota.Mes - 1]}/{nota.Ano}: Nota no valor de {nota.Valor} pago à empresa {nota.Empresa}, CNPJ {nota.Cnpj}.");
+                    }
+                    sw.WriteLine();
+                }
+
+                sw.WriteLine();
+            }
+
+        }
         private static void compararGabineteDoacoes()
         {
             Console.WriteLine("Abrindo bancos");
