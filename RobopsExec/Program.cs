@@ -25,14 +25,20 @@ namespace RobopsExec
             Console.WriteLine("Lendo dados");
 
             //Robops.Spiders.Senado.Leg.Combustivel.CatalogaGastosVeiculo.run();
-            processaCsvParaTxt();
+            //processaCsvParaTxt();
+
+            for (int i = 2019; i < 2022; i++)
+            {
+                ColetarVerba.run(i);
+
+            }
 
             Console.WriteLine("Fim");
         }
 
         private static void processaCsvParaTxt()
         {
-            string[] meses = { 
+            string[] meses = {
                 "Janeiro", "Fevereiro", "Março", "Abril",
                 "Maio", "Junho", "Julho", "Agosto",
                 "Setembro", "Outubro", "Novembro", "Dezembro"
@@ -89,7 +95,7 @@ namespace RobopsExec
             SqliteDB dbGabinete = new SqliteDB("gabinete_camara.db");
             SqliteDB dbDoacoes = new SqliteDB("doacoes_2020.db");
             Console.WriteLine("Selecionando doadores");
-            var modelDoacoes = dbDoacoes.ExecuteQuery<Robops.Lib.TSE.Contas.ReceitasModel>("SELECT * FROM ReceitasModel WHERE length(DocumentoDoador) = 11 ", null)
+            var modelDoacoes = dbDoacoes.Query<Robops.Lib.TSE.Contas.ReceitasModel>("SELECT * FROM ReceitasModel WHERE length(DocumentoDoador) = 11 ", null)
                                         .Where(o => o.Ano == 2020)
                                         .OrderBy(o => o.NomeDoadorRFB)
                                         .ToArray();

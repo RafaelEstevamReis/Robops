@@ -30,7 +30,7 @@ namespace Robops.Spiders.Transparencia.AuxilioEmergencial
 
             {
                 // recovery from where it stopped
-                var allNis = db.ExecuteQuery<string>("SELECT NIS FROM AuxilioModel WHERE NIS IS NOT NULL", null)
+                var allNis = db.Query<string>("SELECT NIS FROM AuxilioModel WHERE NIS IS NOT NULL", null)
                                .Select(nis => long.Parse(nis));
                 uids = new HashSet<long>(allNis);
             }
