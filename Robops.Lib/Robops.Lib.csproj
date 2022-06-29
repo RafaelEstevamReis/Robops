@@ -5,7 +5,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Simple.Sqlite" Version="0.8.5.2" />
+    <PackageReference Include="Simple.Sqlite" Version="0.8.5.4" />
   </ItemGroup>
 
   <ItemGroup>

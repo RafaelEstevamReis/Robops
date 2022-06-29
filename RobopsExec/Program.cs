@@ -27,11 +27,14 @@ namespace RobopsExec
             //Robops.Spiders.Senado.Leg.Combustivel.CatalogaGastosVeiculo.run();
             //processaCsvParaTxt();
 
-            for (int i = 2019; i < 2022; i++)
-            {
-                ColetarVerba.run(i);
+            //for (int i = 2019; i < 2022; i++)
+            //{
+            //    ColetarVerba.run(i);
 
-            }
+            //}
+
+            Robops.Spiders.AL.RJ.ColetaBudgets.GeraArquivoBudget("ALRJ.csv");
+
 
             Console.WriteLine("Fim");
         }
