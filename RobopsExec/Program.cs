@@ -1,7 +1,10 @@
 ﻿using System;
 using System.IO;
 using System.Linq;
+using System.Net;
+using System.Net.Http;
 using System.Text;
+using System.Threading.Tasks;
 using Newtonsoft.Json;
 using RafaelEstevam.Simple.Spider.Helper;
 using Robops.Lib;
@@ -10,13 +13,14 @@ using Robops.Lib.Camara.Leg.Gabinete;
 using Robops.Spiders.AL.MG;
 using Robops.Spiders.Camara.Leg.Cota;
 using Robops.Spiders.Senado.Leg.Pessoal;
+using Simple.API;
 using Simple.Sqlite;
 
 namespace RobopsExec
 {
     class Program
     {
-        static void Main(string[] args)
+        static async Task Main(string[] args)
         {
             SqliteDB.EnabledDatabaseBackup = false; // 5GB é muito, deixa quieto
             Console.WriteLine("Preparando banco de dados");
@@ -24,21 +28,41 @@ namespace RobopsExec
             //Console.WriteLine($"BD: {db.DatabaseFileName}");
             Console.WriteLine("Lendo dados");
 
-            //Robops.Spiders.Senado.Leg.Combustivel.CatalogaGastosVeiculo.run();
-            //processaCsvParaTxt();
 
-            //for (int i = 2019; i < 2022; i++)
-            //{
-            //    ColetarVerba.run(i);
+            // baixar notas de fornecedor
+            var ci = new ClientInfo("https://api.ops.net.br/deputado/");
+            int fornecedor = 28252;
+            var recibos = await ci.PostAsync<Robops.Lib.SiteOPS.DeputadoFederal.Agrupamento>("lancamentos",
+                    Robops.Lib.SiteOPS.DeputadoFederal.FiltroAgrupamento.AgruparFornecedor(9, fornecedor, 0, 100));
 
-            //}
+            var client = new WebClient();
+            if(!Directory.Exists("recibos")) Directory.CreateDirectory("recibos");
+            using var sw = new StreamWriter($"recibos\\recibos_{fornecedor}.txt");
+            foreach (var recibo in recibos.Data.data)
+            {
+                Console.WriteLine("documento/" + recibo.id_cf_despesa);
+                // faz request do documento
+                var doc = await ci.GetAsync<Robops.Lib.SiteOPS.DeputadoFederal.Documento>("documento/" + recibo.id_cf_despesa);
 
-            Robops.Spiders.AL.RJ.ColetaBudgets.GeraArquivoBudget("ALRJ.csv");
-
+                sw.WriteLine($"Competência: {doc.Data.competencia} Emissão: {doc.Data.data_emissao} ValorLiq: {doc.Data.valor_liquido} Desc: {doc.Data.descricao_despesa}");
+                sw.WriteLine($"[{recibo.numero_documento}] {doc.Data.url_documento}");
+                client.DownloadFile(doc.Data.url_documento, $"recibos\\{doc.Data.ano_mes}_{recibo.numero_documento}_{doc.Data.id_documento}.pdf");
+            }
 
             Console.WriteLine("Fim");
         }
+        private static void coletaBudgetALRJ()
+        {
+            Robops.Spiders.Senado.Leg.Combustivel.CatalogaGastosVeiculo.run();
+            processaCsvParaTxt();
 
+            for (int i = 2019; i < 2022; i++)
+            {
+                ColetarVerba.run(i);
+            }
+
+            Robops.Spiders.AL.RJ.ColetaBudgets.GeraArquivoBudget("ALRJ.csv");
+        }
         private static void processaCsvParaTxt()
         {
             string[] meses = {
