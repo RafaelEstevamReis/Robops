@@ -14,6 +14,7 @@ using Robops.Spiders.AL.MG;
 using Robops.Spiders.Camara.Leg.Cota;
 using Robops.Spiders.Senado.Leg.Pessoal;
 using Simple.API;
+using Simple.Brazilian.Documents;
 using Simple.Sqlite;
 
 namespace RobopsExec
@@ -28,7 +29,67 @@ namespace RobopsExec
             //Console.WriteLine($"BD: {db.DatabaseFileName}");
             Console.WriteLine("Lendo dados");
 
+            processaPlanilhaGastosAno();
 
+
+            Console.WriteLine("Fim");
+        }
+
+        private static void processaPlanilhaGastosAno()
+        {
+            var path = "Planilha12003a2022.csv";
+            // DATA PGTO;CPF SERVIDOR;CPF/CNPJ FORNECEDOR;NOME FORNECEDOR;VALOR;TIPO;SUBELEMENTO DE DESPESA;CDIC
+            FastCsv csv = new FastCsv();
+            var dados = csv.ReadDelimiter(File.OpenRead(path))
+                           .Skip(1)
+                           .Select(l => new
+                           {
+                               dt = l[0].ToDateTime(),
+                               cpf = l[1],
+                               forn = l[2],
+                               nome = l[3],
+                               valor = l[4].ToDecimal(0),
+                               tipo = l[5],
+                               sub = l[6],
+                               cdic = l[7],
+                           })
+                           .ToArray();
+
+            var agrAno = dados.GroupBy(d => d.dt.Year);
+
+            var dadosAno = agrAno.Select(g => new
+                                 {
+                                     agrAno = g.Key,
+                                     fornecedores = g.GroupBy(o => o.forn)
+                                                     .Select(o => new
+                                                     {
+                                                         CNPJ = o.Key.Length > 11 ? CNPJ.Mask(o.Key) : CPF.Mask(o.Key),
+                                                         Nome = o.First().nome,
+                                                         Qtd = o.Count(),
+                                                         Total = o.Sum(k => k.valor),
+                                                     })
+                                                     .OrderByDescending(o => o.Total)
+                                                     .ToArray()
+                                 });
+
+            StringBuilder sbCsv = new StringBuilder();
+            StringBuilder sbCsvAno = new StringBuilder();
+            foreach (var ano in dadosAno)
+            {
+                sbCsv.AppendLine($"{ano.agrAno};;;{ano.fornecedores.Sum(o => o.Total):C2};{ano.fornecedores.Length}");
+                sbCsvAno.AppendLine($"ANO;CNPJ;Fornecedor;Total;Ocorências");
+                foreach (var f in ano.fornecedores)
+                {
+                    sbCsvAno.AppendLine($"{ano.agrAno};\"{f.CNPJ}\";\"{f.Nome}\";\"{f.Total:C2}\";{f.Qtd}");
+                    sbCsv.AppendLine($";\"{f.CNPJ}\";\"{f.Nome}\";\"{f.Total:C2}\";{f.Qtd}");
+                }
+                File.WriteAllText($"agrupado_{ano.agrAno}.csv", sbCsvAno.ToString());
+                sbCsvAno.Clear();
+            }
+            File.WriteAllText("agrupadoAno.csv", sbCsv.ToString());
+        }
+        private static async Task baixaDocuemntosAsync()
+        {
             // baixar notas de fornecedor
             var ci = new ClientInfo("https://api.ops.net.br/deputado/");
             int fornecedor = 28252;
@@ -36,7 +97,7 @@ namespace RobopsExec
                     Robops.Lib.SiteOPS.DeputadoFederal.FiltroAgrupamento.AgruparFornecedor(9, fornecedor, 0, 100));
 
             var client = new WebClient();
-            if(!Directory.Exists("recibos")) Directory.CreateDirectory("recibos");
+            if (!Directory.Exists("recibos")) Directory.CreateDirectory("recibos");
             using var sw = new StreamWriter($"recibos\\recibos_{fornecedor}.txt");
             foreach (var recibo in recibos.Data.data)
             {
@@ -49,8 +110,8 @@ namespace RobopsExec
                 client.DownloadFile(doc.Data.url_documento, $"recibos\\{doc.Data.ano_mes}_{recibo.numero_documento}_{doc.Data.id_documento}.pdf");
             }
 
-            Console.WriteLine("Fim");
         }
+
         private static void coletaBudgetALRJ()
         {
             Robops.Spiders.Senado.Leg.Combustivel.CatalogaGastosVeiculo.run();
