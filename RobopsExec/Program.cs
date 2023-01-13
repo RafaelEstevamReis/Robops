@@ -1,11 +1,4 @@
-﻿using System;
-using System.IO;
-using System.Linq;
-using System.Net;
-using System.Net.Http;
-using System.Text;
-using System.Threading.Tasks;
-using Newtonsoft.Json;
+﻿using Newtonsoft.Json;
 using RafaelEstevam.Simple.Spider.Helper;
 using Robops.Lib;
 using Robops.Lib.Camara.Leg.API;
@@ -16,6 +9,12 @@ using Robops.Spiders.Senado.Leg.Pessoal;
 using Simple.API;
 using Simple.Brazilian.Documents;
 using Simple.Sqlite;
+using System;
+using System.IO;
+using System.Linq;
+using System.Net;
+using System.Text;
+using System.Threading.Tasks;
 
 namespace RobopsExec
 {
@@ -53,28 +52,29 @@ namespace RobopsExec
                                sub = l[6],
                                cdic = l[7],
                            })
+                           .Where(o => o.dt.Year > 2000)
                            .ToArray();
 
             var agrAno = dados.GroupBy(d => d.dt.Year);
 
-            var dadosAno = agrAno.Select(g => new
-                                 {
-                                     agrAno = g.Key,
-                                     fornecedores = g.GroupBy(o => o.forn)
-                                                     .Select(o => new
-                                                     {
-                                                         CNPJ = o.Key.Length > 11 ? CNPJ.Mask(o.Key) : CPF.Mask(o.Key),
-                                                         Nome = o.First().nome,
-                                                         Qtd = o.Count(),
-                                                         Total = o.Sum(k => k.valor),
-                                                     })
-                                                     .OrderByDescending(o => o.Total)
-                                                     .ToArray()
-                                 });
+            var dadosAnoFornecedor = agrAno.Select(g => new
+            {
+                agrAno = g.Key,
+                fornecedores = g.GroupBy(o => o.forn)
+                                .Select(o => new
+                                {
+                                    CNPJ = o.Key.Length > 11 ? CNPJ.Mask(o.Key) : CPF.Mask(o.Key),
+                                    Nome = o.First().nome,
+                                    Qtd = o.Count(),
+                                    Total = o.Sum(k => k.valor),
+                                })
+                                .OrderByDescending(o => o.Total)
+                                .ToArray()
+            });
 
             StringBuilder sbCsv = new StringBuilder();
             StringBuilder sbCsvAno = new StringBuilder();
-            foreach (var ano in dadosAno)
+            foreach (var ano in dadosAnoFornecedor)
             {
                 sbCsv.AppendLine($"{ano.agrAno};;;{ano.fornecedores.Sum(o => o.Total):C2};{ano.fornecedores.Length}");
                 sbCsvAno.AppendLine($"ANO;CNPJ;Fornecedor;Total;Ocorências");
@@ -83,10 +83,34 @@ namespace RobopsExec
                     sbCsvAno.AppendLine($"{ano.agrAno};\"{f.CNPJ}\";\"{f.Nome}\";\"{f.Total:C2}\";{f.Qtd}");
                     sbCsv.AppendLine($";\"{f.CNPJ}\";\"{f.Nome}\";\"{f.Total:C2}\";{f.Qtd}");
                 }
-                File.WriteAllText($"agrupado_{ano.agrAno}.csv", sbCsvAno.ToString());
+                File.WriteAllText($"agrupadoFornecedor_{ano.agrAno}.csv", sbCsvAno.ToString());
                 sbCsvAno.Clear();
             }
-            File.WriteAllText("agrupadoAno.csv", sbCsv.ToString());
+            File.WriteAllText("agrupadoAnoFornecedor.csv", sbCsv.ToString());
+            sbCsv.Clear();
+
+            var dadosAnoSub = agrAno.Select(g => new
+            {
+                agrAno = g.Key,
+                sub = g.GroupBy(o => o.sub)
+                       .Select(o => new
+                       {
+                           Sub = o.Key,
+                           Qtd = o.Count(),
+                           Total = o.Sum(k => k.valor),
+                       })
+                       .OrderByDescending(o => o.Total)
+                       .ToArray()
+            });
+            foreach (var ano in dadosAnoSub)
+            {
+                sbCsv.AppendLine($"{ano.agrAno};;{ano.sub.Sum(o => o.Total):C2};{ano.sub.Length}");
+                foreach (var f in ano.sub)
+                {
+                    sbCsv.AppendLine($";\"{f.Sub}\";\"{f.Total:C2}\";{f.Qtd}");
+                }
+            }
+            File.WriteAllText("agrupadoAnoSub.csv", sbCsv.ToString());
         }
         private static async Task baixaDocuemntosAsync()
         {
