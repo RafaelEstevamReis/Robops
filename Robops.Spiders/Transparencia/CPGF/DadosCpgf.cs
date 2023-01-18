@@ -1,5 +1,4 @@
-﻿using OpenQA.Selenium.DevTools.V85.Network;
-using Robops.Lib.Transparencia;
+﻿using Robops.Lib.Transparencia;
 using System.Collections.Generic;
 using System.IO;
 using System.Net;
