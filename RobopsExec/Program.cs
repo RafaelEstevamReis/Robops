@@ -28,7 +28,10 @@ namespace RobopsExec
             //Console.WriteLine($"BD: {db.DatabaseFileName}");
             Console.WriteLine("Lendo dados");
 
-            processaPlanilhaGastosAno();
+            for (int i = 2013; i <= 2022; i++)
+            {
+                Robops.Spiders.Transparencia.CPGF.DadosCpgf.BaixarAno(i, $"cpgf{i}");
+            }
 
 
             Console.WriteLine("Fim");
@@ -112,6 +115,7 @@ namespace RobopsExec
             }
             File.WriteAllText("agrupadoAnoSub.csv", sbCsv.ToString());
         }
+
         private static async Task baixaDocuemntosAsync()
         {
             // baixar notas de fornecedor
