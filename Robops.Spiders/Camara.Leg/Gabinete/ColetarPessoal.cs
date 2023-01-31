@@ -11,14 +11,17 @@ namespace Robops.Spiders.Camara.Leg.Gabinete
 {
     public class ColetarPessoal
     {
-        static SqliteDB db;
-        public static void run(SqliteDB database)
+        static ConnectionFactory db;
+        public static void run(ConnectionFactory database)
         {
             db = database;
-            db.CreateTables()
-              .Add<PessoalModel>()
-              .Add<Deputado>()
-              .Commit();
+            using (var cnn = db.GetConnection())
+            {
+                cnn.CreateTables()
+                  .Add<PessoalModel>()
+                  .Add<Deputado>()
+                  .Commit();
+            }
 
             var init = InitializationParams.Default002()
                 .SetConfig(c => c.Disable_AutoAnchorsLinks()
@@ -90,7 +93,8 @@ namespace Robops.Spiders.Camara.Leg.Gabinete
                     };
                     pessoas.Add(pessoa);
                 }
-                db.BulkInsert(pessoas, addReplace: true);
+                using var cnn = db.GetConnection();
+                cnn.BulkInsert(pessoas, OnConflict.Replace);
             }
             else
             {
@@ -132,8 +136,8 @@ namespace Robops.Spiders.Camara.Leg.Gabinete
                             break;
                     }
                 }
-
-                db.InsertOrReplace(dep);
+                using var cnn = db.GetConnection();
+                cnn.Insert(dep, OnConflict.Replace);
             }
         }
     }
