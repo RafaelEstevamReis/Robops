@@ -22,10 +22,7 @@ namespace RobopsExec
     {
         static async Task Main(string[] args)
         {
-            SqliteDB.EnabledDatabaseBackup = false; // 5GB é muito, deixa quieto
             Console.WriteLine("Preparando banco de dados");
-            //SqliteDB db = new SqliteDB("doacoes_2020.db");            
-            //Console.WriteLine($"BD: {db.DatabaseFileName}");
             Console.WriteLine("Lendo dados");
 
             for (int i = 2013; i <= 2022; i++)
@@ -208,20 +205,24 @@ namespace RobopsExec
         private static void compararGabineteDoacoes()
         {
             Console.WriteLine("Abrindo bancos");
-            SqliteDB dbGabinete = new SqliteDB("gabinete_camara.db");
-            SqliteDB dbDoacoes = new SqliteDB("doacoes_2020.db");
+            var dbGabinete = ConnectionFactory.FromFile("gabinete_camara.db");
+            var dbDoacoes = ConnectionFactory.FromFile("doacoes_2020.db");
+
+            using var cnGabinete = dbGabinete.GetConnection();
+            using var cnDoacoes = dbDoacoes.GetConnection();
+
             Console.WriteLine("Selecionando doadores");
-            var modelDoacoes = dbDoacoes.Query<Robops.Lib.TSE.Contas.ReceitasModel>("SELECT * FROM ReceitasModel WHERE length(DocumentoDoador) = 11 ", null)
+            var modelDoacoes = cnGabinete.Query<Robops.Lib.TSE.Contas.ReceitasModel>("SELECT * FROM ReceitasModel WHERE length(DocumentoDoador) = 11 ", null)
                                         .Where(o => o.Ano == 2020)
                                         .OrderBy(o => o.NomeDoadorRFB)
                                         .ToArray();
             Console.WriteLine("Selecionando pessoal");
-            var gabinete = dbGabinete.GetAll<PessoalModel>()
+            var gabinete = cnGabinete.GetAll<PessoalModel>()
                                      .ToArray();
             var hashNomesGabinete = gabinete.Select(o => o.NomeFuncionario.ToUpper())
                                             .ToHashSet();
 
-            var deputados = dbGabinete.GetAll<Robops.Lib.Camara.Leg.Deputado>()
+            var deputados = cnGabinete.GetAll<Robops.Lib.Camara.Leg.Deputado>()
                                       .ToDictionary(d => d.Id);
 
             Console.WriteLine("Executando busca");
@@ -247,8 +248,10 @@ namespace RobopsExec
 
         private static void processaDadosFolha(int mes, int ano)
         {
-            SqliteDB db = new SqliteDB("senadoresFolha.db");
-            db.CreateTables()
+            //SqliteDB db = new SqliteDB("senadoresFolha.db");
+            var db = ConnectionFactory.FromFile("senadoresFolha.db");
+            using var cnn = db.GetConnection();
+            cnn.CreateTables()
               //.Add<Robops.Lib.Senado.Leg.Senador>()
               //.Add<Robops.Lib.Senado.Leg.FuncionarioGabinete>()
               .Add<Robops.Lib.Senado.Leg.Folha>()
@@ -259,7 +262,7 @@ namespace RobopsExec
 
             var dados = cat.Senadores;
 
-            var jaTem = db.GetAll<Robops.Lib.Senado.Leg.Folha>()
+            var jaTem = cnn.GetAll<Robops.Lib.Senado.Leg.Folha>()
                           .Select(o => $"{o.CodigoFuncionario}-{o.Referencia.Year}-{o.Referencia.Month}")
                           .ToHashSet();
 
@@ -273,7 +276,7 @@ namespace RobopsExec
                                     .ToArray();
 
             var itensFolha = CatalogarDadosFolha.CarregarFolhaFuncionarios(codFuncionarios, mes, ano);
-            db.BulkInsert(itensFolha);
+            cnn.BulkInsert(itensFolha);
             // adicoina os faltantes
             var semInformacao = funcionarios
                                     .Where(f => !itensFolha.Any(iF => iF.CodigoFuncionario == f.CodigoFuncionario))
@@ -283,7 +286,7 @@ namespace RobopsExec
                                         Referencia = new DateTime(ano, mes, 1)
                                     })
                                     .ToArray();
-            db.BulkInsert(semInformacao);
+            cnn.BulkInsert(semInformacao);
         }
 
         private static void comparaListasNomes(string[] Lista1, string[] Lista2)
