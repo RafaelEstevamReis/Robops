@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
@@ -12,7 +12,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Simple.BotUtils" Version="1.5.5" />
+    <PackageReference Include="Simple.BotUtils" Version="1.6.0" />
   </ItemGroup>
 
 </Project>
