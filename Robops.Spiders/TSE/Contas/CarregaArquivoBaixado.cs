@@ -10,11 +10,14 @@ namespace Robops.Spiders.TSE.Contas
 {
     public class CarregaArquivoBaixado
     {
-        public static void run(SqliteDB db)
+        public static void run(ConnectionFactory db)
         {
-            db.CreateTables()
-              .Add<ReceitasModel>()
-              .Commit();
+            using (var cnn = db.GetConnection())
+            {
+                cnn.CreateTables()
+                  .Add<ReceitasModel>()
+                  .Commit();
+            }
             string path;
 
             //foreach (var file in Directory.GetFiles(@"N:\Organizando\Dados Crawlers\TSE\", "*.zip"))
@@ -26,7 +29,7 @@ namespace Robops.Spiders.TSE.Contas
 
         }
 
-        private static void processaArquivo(SqliteDB db, string file)
+        private static void processaArquivo(ConnectionFactory db, string file)
         {
             if (file.EndsWith("2020.zip")) processaArquivo2018_2020(db, file);
             else if (file.EndsWith("2018.zip")) processaArquivo2018_2020(db, file);
@@ -40,7 +43,7 @@ namespace Robops.Spiders.TSE.Contas
             else if (file.EndsWith("2002.zip")) processaArquivo2002(db, file);
         }
 
-        private static void processaArquivo2018_2020(SqliteDB db, string zipName)
+        private static void processaArquivo2018_2020(ConnectionFactory db, string zipName)
         {
             processaCsvZipado(db, zipName,
                               n => n.StartsWith("receitas_candidatos_2") && n.EndsWith("_BRASIL.csv"),
@@ -57,7 +60,7 @@ namespace Robops.Spiders.TSE.Contas
                                   FormaPagamento = processaFormaPagamento(row[33]),
                               });
         }
-        private static void processaArquivo2016(SqliteDB db, string zipName)
+        private static void processaArquivo2016(ConnectionFactory db, string zipName)
         {
             processaCsvZipado(db, zipName,
                               n => n.StartsWith("receitas_candidatos_") && n.EndsWith("_brasil.txt"), // !! TXT
@@ -73,7 +76,7 @@ namespace Robops.Spiders.TSE.Contas
                                   FormaPagamento = processaFormaPagamento(row[28]),
                               });
         }
-        private static void processaArquivo2014(SqliteDB db, string zipName)
+        private static void processaArquivo2014(ConnectionFactory db, string zipName)
         {
             processaCsvZipado(db, zipName,
                               n => n.StartsWith("receitas_candidatos_") && n.EndsWith("_brasil.txt"), // !! TXT
@@ -89,7 +92,7 @@ namespace Robops.Spiders.TSE.Contas
                                   FormaPagamento = processaFormaPagamento(row[25]),
                               });
         }
-        private static void processaArquivo2012(SqliteDB db, string zipName)
+        private static void processaArquivo2012(ConnectionFactory db, string zipName)
         {
             processaCsvZipado(db, zipName,
                               n => n.StartsWith("receitas_candidatos_") && n.EndsWith("_brasil.txt"), // !! TXT
@@ -105,7 +108,7 @@ namespace Robops.Spiders.TSE.Contas
                                   FormaPagamento = processaFormaPagamento(row[26]),
                               });
         }
-        private static void processaArquivo2010(SqliteDB db, string zipName)
+        private static void processaArquivo2010(ConnectionFactory db, string zipName)
         {
             processaCsvZipado(db, zipName,
                               n => n == "ReceitasCandidatos.txt",
@@ -121,7 +124,7 @@ namespace Robops.Spiders.TSE.Contas
                                   FormaPagamento = processaFormaPagamento(row[17]),
                               });
         }
-        private static void processaArquivo2008(SqliteDB db, string zipName)
+        private static void processaArquivo2008(ConnectionFactory db, string zipName)
         {
             processaCsvZipado(db, zipName,
                               n => n.StartsWith("receitas_candidatos_") && n.EndsWith("_brasil.csv"),
@@ -137,7 +140,7 @@ namespace Robops.Spiders.TSE.Contas
                                   FormaPagamento = processaFormaPagamento(row[18]),
                               });
         }
-        private static void processaArquivo2006(SqliteDB db, string zipName)
+        private static void processaArquivo2006(ConnectionFactory db, string zipName)
         {
             // O arquivo original baixado está com o ZIP corrompido
             // mas pode ser aberto e resalvo
@@ -155,7 +158,7 @@ namespace Robops.Spiders.TSE.Contas
                                   FormaPagamento = processaFormaPagamento(row[13]),
                               });
         }
-        private static void processaArquivo2004(SqliteDB db, string zipName)
+        private static void processaArquivo2004(ConnectionFactory db, string zipName)
         {
             processaCsvZipado(db, zipName,
                               n => n == "ReceitaCandidato.CSV",
@@ -171,7 +174,7 @@ namespace Robops.Spiders.TSE.Contas
                                   FormaPagamento = processaFormaPagamento(row[13]),
                               });
         }
-        private static void processaArquivo2002(SqliteDB db, string zipName)
+        private static void processaArquivo2002(ConnectionFactory db, string zipName)
         {
             // O arquivo original baixado está com o ZIP corrompido
             // mas pode ser aberto e resalvo
@@ -209,7 +212,7 @@ namespace Robops.Spiders.TSE.Contas
             return ReceitasModel.FormasPagamento.Outros;
         }
 
-        private static void processaCsvZipado(SqliteDB db, string zipName, Func<string, bool> fileFilter, Func<string[], ReceitasModel> extractionFilter)
+        private static void processaCsvZipado(ConnectionFactory db, string zipName, Func<string, bool> fileFilter, Func<string[], ReceitasModel> extractionFilter)
         {
             var zip = new LeitorZipTransparencia(zipName);
             // Receitas, Brasil, agnóstico ao ano
@@ -221,7 +224,8 @@ namespace Robops.Spiders.TSE.Contas
 
             var buffer = new DataBuffer<ReceitasModel>(30000, data =>
             {
-                db.BulkInsert(data, addReplace: true);
+                using var cnn = db.GetConnection();
+                cnn.BulkInsert(data, OnConflict.Replace);
             });
             int qtd = 0;
             foreach (var row in rows)
