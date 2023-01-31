@@ -1,12 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using Serilog;
 
 namespace Robops.Pickle.Models
 {
     public class ConfiguracaoColeta
     {
+        public ILogger Logger { get; set; }
     }
 }
