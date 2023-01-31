@@ -1,13 +1,13 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Text;
-using RafaelEstevam.Simple.Spider.Helper;
+﻿using RafaelEstevam.Simple.Spider.Helper;
 using Robops.Lib;
 using Robops.Lib.Transparencia;
 using Robops.Lib.Transparencia.AuxilioEmergencial;
 using Simple.DatabaseWrapper;
+using Simple.Sqlite;
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
 
 namespace Robops.Spiders.Transparencia.AuxilioEmergencial
 {
@@ -15,11 +15,14 @@ namespace Robops.Spiders.Transparencia.AuxilioEmergencial
     {
         static HashSet<long> uids;
         static int qtd = 0;
-        public static void run(Simple.Sqlite.SqliteDB db)
+        public static void run(ConnectionFactory db)
         {
-            db.CreateTables()
-              .Add<AuxilioModel>()
-              .Commit();
+            using (var cnn = db.GetConnection())
+            {
+                cnn.CreateTables()
+                  .Add<AuxilioModel>()
+                  .Commit();
+            }
 
             string pasta = "";
             while (!Directory.Exists(pasta))
@@ -29,15 +32,16 @@ namespace Robops.Spiders.Transparencia.AuxilioEmergencial
             }
 
             {
+                using var cnn = db.GetConnection();
                 // recovery from where it stopped
-                var allNis = db.Query<string>("SELECT NIS FROM AuxilioModel WHERE NIS IS NOT NULL", null)
+                var allNis = cnn.Query<string>("SELECT NIS FROM AuxilioModel WHERE NIS IS NOT NULL", null)
                                .Select(nis => long.Parse(nis));
                 uids = new HashSet<long>(allNis);
             }
 
             processaPasta(pasta, db);
         }
-        private static void processaPasta(string pasta, Simple.Sqlite.SqliteDB db)
+        private static void processaPasta(string pasta, ConnectionFactory db)
         {
             foreach (var arquivo in Directory.GetFiles(pasta, "*.zip"))
             {
@@ -50,7 +54,7 @@ namespace Robops.Spiders.Transparencia.AuxilioEmergencial
             }
         }
 
-        private static void processaArquivo(string zipName, Simple.Sqlite.SqliteDB db)
+        private static void processaArquivo(string zipName, ConnectionFactory db)
         {
             var zip = new LeitorZipTransparencia(zipName);
             //zip.ShouldProcessFile = n => n.Contains("_Cadastro");
@@ -62,7 +66,8 @@ namespace Robops.Spiders.Transparencia.AuxilioEmergencial
 
             var buffer = new DataBuffer<AuxilioModel>(20000, data =>
             {
-                db.BulkInsert(data, addReplace: true);
+                using var cnn = db.GetConnection();
+                cnn.BulkInsert(data, OnConflict.Replace);
                 Console.WriteLine($"# Data Write ");
             });
             foreach (var row in rows)
