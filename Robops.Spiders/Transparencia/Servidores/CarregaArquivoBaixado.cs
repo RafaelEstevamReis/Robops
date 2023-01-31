@@ -6,6 +6,7 @@ using Robops.Lib;
 using Robops.Lib.Transparencia;
 using Robops.Lib.Transparencia.Servidores;
 using Simple.DatabaseWrapper;
+using Simple.Sqlite;
 
 namespace Robops.Spiders.Transparencia.Servidores
 {
@@ -13,11 +14,14 @@ namespace Robops.Spiders.Transparencia.Servidores
     {
         static HashSet<string> uids;
         static int qtd = 0;
-        public static void run(Simple.Sqlite.SqliteDB db)
+        public static void run(ConnectionFactory db)
         {
-            db.CreateTables()
-              .Add<ServidoresCadastroModel>()
-              .Commit();
+            using (var cnn = db.GetConnection())
+            {
+                cnn.CreateTables()
+                  .Add<ServidoresCadastroModel>()
+                  .Commit();
+            }
 
             Console.WriteLine("Entre com a pasta:");
             string pasta = Console.ReadLine();
@@ -25,7 +29,7 @@ namespace Robops.Spiders.Transparencia.Servidores
             uids = new HashSet<string>();
             processaPasta(pasta, db);
         }
-        private static void processaPasta(string pasta, Simple.Sqlite.SqliteDB db)
+        private static void processaPasta(string pasta, ConnectionFactory db)
         {
             foreach (var arquivo in Directory.GetFiles(pasta, "*.zip"))
             {
@@ -35,7 +39,7 @@ namespace Robops.Spiders.Transparencia.Servidores
             }
         }
 
-        private static void processaArquivo(string zipName, bool militar, Simple.Sqlite.SqliteDB db)
+        private static void processaArquivo(string zipName, bool militar, ConnectionFactory db)
         {
             var zip = new LeitorZipTransparencia(zipName);
             zip.ShouldProcessFile = n => n.Contains("_Cadastro");
@@ -45,7 +49,11 @@ namespace Robops.Spiders.Transparencia.Servidores
             var zipLines = zip.ReadLines();
             var rows = CSVHelper.DelimiterSplit(zipLines, ';');
 
-            var buffer = new DataBuffer<ServidoresCadastroModel>(10000, data => db.BulkInsert(data, addReplace: true));
+            var buffer = new DataBuffer<ServidoresCadastroModel>(10000, data =>
+            {
+                var cnn = db.GetConnection();
+                cnn.BulkInsert(data, OnConflict.Replace);
+            });
             foreach (var row in rows)
             {
                 var cad = new ServidoresCadastroModel()
