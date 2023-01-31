@@ -18,8 +18,7 @@ namespace Robops.Spiders.TSE.Contas
                   .Add<ReceitasModel>()
                   .Commit();
             }
-            string path;
-
+            //string path;
             //foreach (var file in Directory.GetFiles(@"N:\Organizando\Dados Crawlers\TSE\", "*.zip"))
             //{
             //    processaArquivo(db, file);
