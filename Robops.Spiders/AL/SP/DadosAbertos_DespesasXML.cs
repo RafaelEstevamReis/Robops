@@ -1,8 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using RafaelEstevam.Simple.Spider.Helper;
 using System.IO;
 using System.Text;
-using RafaelEstevam.Simple.Spider.Helper;
 
 namespace Robops.Spiders.AL.SP
 {
