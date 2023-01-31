@@ -1,20 +1,15 @@
-﻿using Robops.Pickle.Interfaces;
+﻿using Robops.Pickle.Helpers;
+using Robops.Pickle.Interfaces;
 using Robops.Pickle.Models;
-using Serilog;
-using Serilog.Events;
 using Simple.BotUtils.Helpers;
+using System;
 using System.IO;
 using System.Linq;
 using System.Reflection;
 
 var cfg = new ConfiguracaoColeta()
 {
-    Logger = new LoggerConfiguration()
-            .MinimumLevel.Override("Microsoft", LogEventLevel.Information)
-            .Enrich.FromLogContext()
-            .WriteTo.Console()
-            .WriteTo.File(Path.Combine("logs", "Logs.txt"), rollingInterval: RollingInterval.Day)
-            .CreateLogger(),
+    Logger = LoggerHelper.Criar(Path.Combine("logs", "Logs.txt")),
 };
 
 cfg.Logger.Information("Pickle Start");
@@ -27,9 +22,21 @@ cfg.Logger.Information($"{coletores.Length} coletores inicializados");
 
 foreach (var coletor in coletores)
 {
-    cfg.Logger.Information($"[INIT] {coletor.GetType().Name} para {coletor.NomeCasa} ");
-    coletor.Setup(cfg);
-    coletor.ColetarDados();
+    var nomeColetor = coletor.GetType().Name;
+
+    try
+    {
+        cfg.Logger.Information($"[INIT] {nomeColetor} para {coletor.NomeCasa} ");
+        coletor.Setup(cfg);
+
+        cfg.Logger.Information($"[EXEC] {coletor.NomeCasa} ");
+        coletor.ColetarDados();
+    }
+    catch (Exception ex)
+    {
+        cfg.Logger.Error(ex, $"Falha no coletor {nomeColetor}");
+        continue;
+    }
 }
 
 cfg.Logger.Information("Finalizado");
